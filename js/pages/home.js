@@ -16,7 +16,19 @@ const TOWNS = [['Ada', 45.80, 20.13], ['Bačka Topola', 45.81, 19.63], ['Bečej'
 export async function render(el, _p, ctx) {
   el.innerHTML = `
   <div class="page">
-    <div class="hero"><h1>${esc(t('nav_lakes'))}</h1><p>${esc(t('tagline'))}</p></div>
+    <section class="lake-hero">
+      <div class="lh-text"><span class="lh-kicker">${icon('fish', 16)} Ripple</span><h1>${esc(t('nav_lakes'))}</h1><p>${esc(t('tagline'))}</p></div>
+      <svg class="lh-reeds" viewBox="0 0 200 160" aria-hidden="true"><g fill="none" stroke-linecap="round">
+        <path class="reed" d="M30 160 C 32 110 28 70 36 20" stroke-width="3"/><path class="reed d2" d="M48 160 C 50 120 54 90 50 45" stroke-width="3"/>
+        <path class="reed d3" d="M64 160 C 62 125 66 100 72 60" stroke-width="2.5"/><path class="reed d2" d="M150 160 C 152 120 148 95 156 50" stroke-width="3"/>
+        <path class="reed" d="M168 160 C 166 130 170 110 176 80" stroke-width="2.5"/></g>
+        <g fill="#7A5A2E"><rect class="reed" x="32" y="18" width="7" height="26" rx="3.5"/><rect class="reed d2" x="46" y="44" width="7" height="22" rx="3.5"/><rect class="reed d2" x="152" y="48" width="7" height="24" rx="3.5"/></g></svg>
+      <svg class="lh-fish" viewBox="0 0 60 24" aria-hidden="true"><path d="M2 12c8-10 26-10 36 0-10 10-28 10-36 0Z M38 12l14-8v16Z" fill="currentColor"/></svg>
+      <svg class="lh-waves" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
+        <path class="w1" d="M0 40 C 240 0 480 80 720 40 S 1200 0 1440 40 V90 H0Z"/>
+        <path class="w2" d="M0 60 C 240 20 480 100 720 60 S 1200 20 1440 60 V90 H0Z"/>
+      </svg>
+    </section>
     <div class="card wx-card wx-wide" id="homeWx"></div>
     <div class="filters">
       <label class="search"><span class="sr-only">${esc(t('search_ph'))}</span>

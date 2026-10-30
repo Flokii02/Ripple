@@ -50,6 +50,14 @@ const PAGES = {
   legal: () => import('./pages/legal.js')
 };
 
+const SPLASH_START = Date.now();
+function hideSplash() {
+  const sp = document.getElementById('splash'); if (!sp || sp.classList.contains('out')) return;
+  const wait = Math.max(0, 900 - (Date.now() - SPLASH_START));
+  setTimeout(() => { sp.classList.add('out'); setTimeout(() => sp.remove(), 600); }, wait);
+}
+setTimeout(hideSplash, 6000);
+
 export function go(path) { location.hash = '#' + path; }
 
 let renderSeq = 0;
@@ -72,9 +80,11 @@ async function route() {
     document.body.dataset.page = name;
     await mod.render(main, params, ctx);
     window.scrollTo(0, 0);
+    hideSplash();
   } catch (e) {
     console.error(e);
     if (seq === renderSeq) main.innerHTML = `<div class="page narrow"><div class="empty">${esc(t('error'))}</div></div>`;
+    hideSplash();
   }
 }
 

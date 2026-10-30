@@ -85,7 +85,7 @@ export function randomName() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8) + '.jpg';
 }
 
-export function spinner() { return `<div class="spinner" role="status" aria-label="${esc(t('loading'))}"></div>`; }
+export function spinner() { return `<div class="loader" role="status" aria-label="${esc(t('loading'))}"><svg class="bob-svg" viewBox="0 0 120 120" aria-hidden="true">       <g class="bob"><line x1="60" y1="8" x2="60" y2="30" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>       <path d="M43 54 A17 25 0 0 1 77 54 Z" fill="#E2A73E"/><path d="M43 54 A17 25 0 0 0 77 54 Z" fill="currentColor"/></g>       <ellipse class="ring r1" cx="60" cy="88" rx="30" ry="8"/><ellipse class="ring r2" cx="60" cy="88" rx="30" ry="8"/><ellipse class="ring r3" cx="60" cy="88" rx="30" ry="8"/>     </svg></div>`; }
 
 // Ikonok (vonalas SVG)
 const I = {

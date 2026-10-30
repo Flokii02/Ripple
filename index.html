@@ -21,6 +21,20 @@
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
+<div id="splash" aria-hidden="true">
+  <div class="splash-in">
+    <svg class="bob-svg" viewBox="0 0 120 120" aria-hidden="true">
+      <g class="bob"><line x1="60" y1="8" x2="60" y2="30" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+      <path d="M43 54 A17 25 0 0 1 77 54 Z" fill="#E2A73E"/><path d="M43 54 A17 25 0 0 0 77 54 Z" fill="currentColor"/></g>
+      <ellipse class="ring r1" cx="60" cy="88" rx="30" ry="8"/><ellipse class="ring r2" cx="60" cy="88" rx="30" ry="8"/><ellipse class="ring r3" cx="60" cy="88" rx="30" ry="8"/>
+    </svg>
+    <div class="splash-name">Ripple</div>
+  </div>
+  <svg class="splash-waves" viewBox="0 0 1440 120" preserveAspectRatio="none" aria-hidden="true">
+    <path class="w1" d="M0 60 C 240 20 480 100 720 60 S 1200 20 1440 60 V120 H0Z"/>
+    <path class="w2" d="M0 80 C 240 40 480 120 720 80 S 1200 40 1440 80 V120 H0Z"/>
+  </svg>
+</div>
 <header class="topbar">
   <a href="#/" class="brand" id="brand" aria-label="Ripple"></a>
   <nav class="topnav" id="topNav" aria-label="Glavni meni"></nav>
