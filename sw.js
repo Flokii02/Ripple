@@ -1,5 +1,5 @@
 // Egyszerű service worker: hálózat először, offline esetén a gyorsítótár
-const CACHE = 'ripple-v3';
+const CACHE = 'ripple-v4';
 self.addEventListener('install', e => self.skipWaiting());
 self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
 self.addEventListener('fetch', e => {

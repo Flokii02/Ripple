@@ -7,6 +7,10 @@ import { MAP_CENTER as REGION } from '../config.js';
 let LAKES = [];
 const F = { q: '', species: '', night: false, acc: false, food: false, boat: false, fav: false, view: 'list' };
 let WX = {};
+// Települések a helyválasztóhoz (ha a telefon nem adja meg a helyzetet)
+const TOWNS = [['Ada', 45.80, 20.13], ['Bačka Topola', 45.81, 19.63], ['Bečej', 45.62, 20.03], ['Kanjiža', 46.07, 20.05], ['Kikinda', 45.83, 20.47], ['Novi Bečej', 45.60, 20.13],
+  ['Novi Kneževac', 46.05, 20.10], ['Novi Sad', 45.27, 19.83], ['Pančevo', 44.87, 20.64], ['Senta', 45.93, 20.08], ['Sombor', 45.77, 19.11], ['Subotica', 46.10, 19.67],
+  ['Temerin', 45.41, 19.89], ['Vršac', 45.12, 21.30], ['Zrenjanin', 45.38, 20.39]];
 
 export async function render(el, _p, ctx) {
   el.innerHTML = `
@@ -47,13 +51,14 @@ export async function render(el, _p, ctx) {
   let lakeOpts = [];
   const drawWx = () => {
     const loc = getLoc() || { kind: 'region', lat: REGION[0], lng: REGION[1] };
-    const sel = loc.kind === 'lake' ? 'lake:' + loc.id : loc.kind;
+    const sel = loc.kind === 'lake' ? 'lake:' + loc.id : loc.kind === 'town' ? 'town:' + loc.id : loc.kind;
     const head = `<div class="wx-head"><h2>${esc(t('wx_today'))}</h2>
       <label class="wx-loc"><span class="sr-only">${esc(t('loc_label'))}</span>${icon('pin', 16)}
         <select id="wxLoc">
           <option value="region" ${sel === 'region' ? 'selected' : ''}>${esc(t('loc_region'))}</option>
           <option value="mine" ${sel === 'mine' ? 'selected' : ''}>${esc(t('my_location'))}</option>
-          ${lakeOpts.map(l => `<option value="lake:${l.id}" ${sel === 'lake:' + l.id ? 'selected' : ''}>${esc(l.name)}</option>`).join('')}
+          <optgroup label="${esc(t('place'))}">${TOWNS.map(x => `<option value="town:${x[0]}" ${sel === 'town:' + x[0] ? 'selected' : ''}>${esc(x[0])}</option>`).join('')}</optgroup>
+          ${lakeOpts.length ? `<optgroup label="${esc(t('nav_lakes'))}">${lakeOpts.map(l => `<option value="lake:${l.id}" ${sel === 'lake:' + l.id ? 'selected' : ''}>${esc(l.name)}</option>`).join('')}</optgroup>` : ''}
         </select></label></div>`;
     wxBox.innerHTML = head + spinner();
     renderWeatherCard(wxBox, loc.lat, loc.lng, { head }).then(() => bindLoc());
@@ -66,10 +71,17 @@ export async function render(el, _p, ctx) {
       if (v === 'region') { setLoc({ kind: 'region', lat: REGION[0], lng: REGION[1] }); drawWx(); }
       else if (v === 'mine') {
         if (!navigator.geolocation) { toast(t('loc_denied'), 'err'); return; }
+        wxBox.querySelector('.wx-head')?.insertAdjacentHTML('afterend', `<p class="small muted" id="wxLocWait">${esc(t('loading'))}</p>`);
         navigator.geolocation.getCurrentPosition(p => { setLoc({ kind: 'mine', lat: +p.coords.latitude.toFixed(3), lng: +p.coords.longitude.toFixed(3) }); drawWx(); },
-          () => { toast(t('loc_denied'), 'err'); drawWx(); }, { timeout: 10000, maximumAge: 600000 });
-      } else { const l = lakeOpts.find(x => 'lake:' + x.id === v); if (l) { setLoc({ kind: 'lake', id: l.id, lat: l.lat, lng: l.lng }); drawWx(); } }
+          err => { drawWx(); setTimeout(() => showLocHelp(err && err.code === 1 ? 'loc_help_denied' : 'loc_denied'), 50); },
+          { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 });
+      } else if (v.startsWith('town:')) { const tw = TOWNS.find(x => 'town:' + x[0] === v); if (tw) { setLoc({ kind: 'town', id: tw[0], lat: tw[1], lng: tw[2] }); drawWx(); } }
+      else { const l = lakeOpts.find(x => 'lake:' + x.id === v); if (l) { setLoc({ kind: 'lake', id: l.id, lat: l.lat, lng: l.lng }); drawWx(); } }
     };
+  };
+  const showLocHelp = key => {
+    const h = wxBox.querySelector('.wx-head');
+    if (h && !$('#wxHelp')) h.insertAdjacentHTML('afterend', `<div class="notice" id="wxHelp" style="grid-column:1/-1">${esc(t(key))}</div>`);
   };
   drawWx();
 

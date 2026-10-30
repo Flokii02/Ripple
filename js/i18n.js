@@ -38,7 +38,7 @@ const DICT = {
     reviews: 'Ocene', review_add: 'Oceni jezero', review_your: 'Vaša ocena', review_text: 'Komentar (opciono)', review_none: 'Još nema ocena. Budite prvi!',
     review_owner: 'Vlasnik ne može da oceni svoje jezero.', reviews_n: 'ocena', rating: 'Ocena',
     fav: 'Omiljeno', fav_add: 'Dodaj u omiljena', fav_remove: 'Ukloni iz omiljenih', favs: 'Omiljena jezera', favs_empty: 'Još nemate omiljena jezera. Dodajte ih srcem na stranici jezera.',
-    wx_today: 'Vreme za pecanje danas', loc_region: 'Vojvodina (centar)', loc_label: 'Lokacija', loc_denied: 'Lokacija nije dostupna. Izaberite jezero ili mesto.',
+    wx_today: 'Vreme za pecanje danas', loc_region: 'Vojvodina (centar)', loc_label: 'Lokacija', loc_denied: 'Lokacija nije dostupna. Izaberite mesto ili jezero sa liste.', loc_help_denied: 'Telefon je odbio pristup lokaciji. iPhone: Podešavanja → Privatnost → Lokacijske usluge → (vaš pregledač) → Dok se koristi aplikacija. Android: ikonica katanca pored adrese → Dozvole → Lokacija. Do tada izaberite mesto sa liste.',
     only_favs: 'Omiljena', last_stock: 'Poslednje poribljavanje', next_comp: 'Sledeće takmičenje',
     install: 'Instaliraj aplikaciju', kg: 'kg', cm: 'cm', from: 'od'
   },
@@ -80,7 +80,7 @@ const DICT = {
     reviews: 'Értékelések', review_add: 'Értékeld a tavat', review_your: 'Az értékelésed', review_text: 'Vélemény (nem kötelező)', review_none: 'Még nincs értékelés. Légy az első!',
     review_owner: 'A tulajdonos nem értékelheti a saját tavát.', reviews_n: 'értékelés', rating: 'Értékelés',
     fav: 'Kedvenc', fav_add: 'Kedvencekhez', fav_remove: 'Eltávolítás a kedvencekből', favs: 'Kedvenc tavaim', favs_empty: 'Még nincs kedvenc tavad. A tó oldalán a szívvel adhatod hozzá.',
-    wx_today: 'Horgászidő ma', loc_region: 'Vajdaság (közép)', loc_label: 'Helyszín', loc_denied: 'A helyzeted nem érhető el. Válassz tavat vagy helyet.',
+    wx_today: 'Horgászidő ma', loc_region: 'Vajdaság (közép)', loc_label: 'Helyszín', loc_denied: 'A helyzeted nem érhető el. Válassz települést vagy tavat a listából.', loc_help_denied: 'A telefon nem engedi a helymeghatározást. iPhone: Beállítások → Adatvédelem → Helymeghatározás → (a böngésződ) → Az app használata közben. Android: a cím melletti lakat ikon → Engedélyek → Helyadatok. Addig válassz települést a listából.',
     only_favs: 'Kedvencek', last_stock: 'Utolsó telepítés', next_comp: 'Következő verseny',
     install: 'Alkalmazás telepítése', kg: 'kg', cm: 'cm', from: 'tól'
   }
