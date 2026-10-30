@@ -52,6 +52,12 @@ const DICT = {
     more: 'Detalji', less: 'Manje', ins_title: 'Kada ti najbolje grize', ins_need: 'Kada zabeležiš bar 3 ulova sa jezera ili mesta, ovde ćeš videti u kakvom vremenu najviše loviš.',
     ins_pressure: 'Pritisak', ins_temp: 'Temperatura', ins_time: 'Doba dana', ins_moon: 'Mesec', ins_best: 'Najčešće',
     tod_morning: 'Jutro', tod_day: 'Dan', tod_evening: 'Veče', tod_night: 'Noć', wx_saved: 'Vreme u trenutku ulova je sačuvano.',
+    seasons: 'Lovostaj', seasons_sub: 'Kada je koja riba zaštićena i najmanje dozvoljene dužine.', ss_now: 'Danas u lovostaju', ss_none: 'Danas nijedna vrsta nije u lovostaju.',
+    ss_soon: 'Uskoro (30 dana)', ss_none_soon: 'U narednih 30 dana ne počinje nijedan lovostaj.', ss_calendar: 'Kalendar lovostaja', ss_table: 'Lovostaj i najmanje dužine',
+    ss_period: 'Lovostaj', ss_min: 'Najmanja dužina', ss_banned: 'Trajna zabrana ulova', ss_banned_sub: 'Ove vrste je zabranjeno loviti tokom cele godine.',
+    ss_note: 'Informativni podaci. Važeći propisi i uslovi vaše dozvole su obavezujući. Na privatnim jezerima sa ribom iz uzgoja mogu važiti posebna pravila jezera, proverite ih kod vlasnika.',
+    ss_source: 'Izvor: Naredba o merama za očuvanje i zaštitu ribljeg fonda, Sl. glasnik RS 104/2009; kečiga: zabrana od 2019.', until: 'do', today: 'Danas',
+    ss_home: 'Lovostaj danas', ss_all: 'Ceo kalendar', warn_season: 'Pažnja: ova vrsta je u ovom periodu u lovostaju.', warn_size: 'Pažnja: riba je manja od najmanje dozvoljene dužine.', warn_banned: 'Pažnja: ova vrsta je trajno zaštićena, ulov je zabranjen.',
     only_favs: 'Omiljena', last_stock: 'Poslednje poribljavanje', next_comp: 'Sledeće takmičenje',
     install: 'Instaliraj aplikaciju', kg: 'kg', cm: 'cm', from: 'od'
   },
@@ -107,6 +113,12 @@ const DICT = {
     more: 'Részletek', less: 'Kevesebb', ins_title: 'Mikor kap nálad a legjobban', ins_need: 'Ha legalább 3 fogást rögzítesz tóról vagy helyről, itt látod majd, milyen időben fogsz a legtöbbet.',
     ins_pressure: 'Légnyomás', ins_temp: 'Hőmérséklet', ins_time: 'Napszak', ins_moon: 'Hold', ins_best: 'Leggyakrabban',
     tod_morning: 'Reggel', tod_day: 'Napközben', tod_evening: 'Este', tod_night: 'Éjjel', wx_saved: 'A fogás pillanatának időjárását elmentettük.',
+    seasons: 'Tilalmi idők', seasons_sub: 'Mikor melyik hal védett, és mekkora a legkisebb kifogható méret.', ss_now: 'Ma tilalom alatt', ss_none: 'Ma egyik halfaj sincs tilalom alatt.',
+    ss_soon: 'Hamarosan (30 nap)', ss_none_soon: 'A következő 30 napban nem kezdődik tilalom.', ss_calendar: 'Tilalmi naptár', ss_table: 'Tilalmi idők és méretkorlátok',
+    ss_period: 'Tilalmi idő', ss_min: 'Legkisebb méret', ss_banned: 'Teljes fogási tilalom', ss_banned_sub: 'Ezeket a fajokat egész évben tilos kifogni.',
+    ss_note: 'Tájékoztató adatok. A hatályos szabályok és a horgászengedélyed feltételei az irányadók. A tenyésztett halakkal telepített magántavakon a tó saját szabályai érvényesek lehetnek, ezt kérdezd meg a tulajdonostól.',
+    ss_source: 'Forrás: Naredba o merama za očuvanje i zaštitu ribljeg fonda, Sl. glasnik RS 104/2009; kecsege: tilalom 2019-től.', until: 'eddig:', today: 'Ma',
+    ss_home: 'Ma tilalom alatt', ss_all: 'Teljes naptár', warn_season: 'Figyelem: ez a faj ebben az időszakban tilalom alatt van.', warn_size: 'Figyelem: a hal kisebb a legkisebb kifogható méretnél.', warn_banned: 'Figyelem: ez a faj védett, kifogni tilos.',
     only_favs: 'Kedvencek', last_stock: 'Utolsó telepítés', next_comp: 'Következő verseny',
     install: 'Alkalmazás telepítése', kg: 'kg', cm: 'cm', from: 'tól'
   }

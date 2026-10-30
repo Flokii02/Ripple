@@ -4,6 +4,7 @@ import { $, $$, esc, icon, fmtMoney, lakePhotoUrl, spinner, toast } from '../ui.
 import { listWeather, wxInfo, wxIcon, trendArrow, renderWeatherCard } from '../weather.js';
 import { MAP_CENTER as REGION } from '../config.js';
 import { isOwner, openSuggest } from '../suggest.js';
+import { SEASONS, seasonName, inSeason, daysUntil } from '../seasons.js';
 
 let LAKES = [];
 const F = { q: '', species: '', night: false, acc: false, food: false, boat: false, fav: false, view: 'list' };
@@ -30,6 +31,7 @@ export async function render(el, _p, ctx) {
       </svg>
     </section>
     <div class="card wx-card wx-wide" id="homeWx"></div>
+    ${seasonCard()}
     <div class="filters">
       <label class="search"><span class="sr-only">${esc(t('search_ph'))}</span>
         <input class="input" id="q" type="search" placeholder="${esc(t('search_ph'))}" value="${esc(F.q)}" autocomplete="off"></label>
@@ -177,4 +179,14 @@ function wxMini(id) {
   const w = WX[id]; if (!w) return '';
   const tr = trendArrow(w.trend);
   return `${wxIcon(wxInfo(w.code).icon, 16)}${Math.round(w.temp)}° <span class="tr tr-${tr.k}" title="${esc(t('wx_pressure') + ': ' + t('p_' + tr.k))}">${tr.a}</span>`;
+}
+
+function seasonCard() {
+  const act = SEASONS.filter(s => inSeason(s));
+  const soon = SEASONS.filter(s => !inSeason(s) && daysUntil(s) !== null && daysUntil(s) <= 14);
+  return `<a class="season-home" href="#/lovostaj">
+    <span class="sh-ic">${icon('shield', 20)}</span>
+    <span class="sh-body"><b>${esc(t('ss_home'))}</b>
+      <span class="chips">${act.length ? act.map(s => `<span class="chip bad">${esc(seasonName(s))}</span>`).join('') : `<span class="small muted">${esc(t('ss_none'))}</span>`}${soon.map(s => `<span class="chip warn">${esc(seasonName(s))} · ${daysUntil(s)}d</span>`).join('')}</span></span>
+    <span class="sh-more">${esc(t('ss_all'))} ›</span></a>`;
 }

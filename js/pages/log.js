@@ -3,6 +3,7 @@ import { t, SPECIES, speciesName } from '../i18n.js';
 import { $, $$, esc, icon, fmtDate, openModal, closeModal, toast, catchPhotoUrls, compressImage, randomName } from '../ui.js';
 import { weatherAt, wxInfo, wxIcon, trendArrow, moonName } from '../weather.js';
 import { MAP_CENTER } from '../config.js';
+import { catchWarning } from '../seasons.js';
 
 export async function render(el, _p, ctx) {
   if (!ctx.user) {
@@ -90,9 +91,16 @@ async function openCatchForm(ctx, c, done) {
     <label class="field"><span>${esc(t('note'))}</span><textarea id="kNote" maxlength="1000">${esc(c?.note || '')}</textarea></label>
     <label class="check"><input type="checkbox" id="kRel" ${c?.released ? 'checked' : ''}>${esc(t('released'))}</label>
     <label class="check"><input type="checkbox" id="kPub" ${c?.is_public ? 'checked' : ''}>${esc(t('public_catch'))}</label>
+    <div class="notice" id="kWarn" hidden></div>
     <div class="err" id="kErr"></div>
     <div class="row"><button class="btn ghost" id="kCancel">${esc(t('cancel'))}</button><button class="btn lake grow" id="kSave">${esc(t('save'))}</button></div>`);
   $('#kCancel', body).onclick = closeModal;
+  const checkWarn = () => {
+    const w = catchWarning($('#kSpecies', body).value, $('#kWhen', body).value || new Date().toISOString(), String($('#kL', body).value).replace(',', '.'));
+    const box = $('#kWarn', body); box.hidden = !w; box.textContent = w ? t('warn_' + w) : '';
+  };
+  ['#kSpecies', '#kWhen', '#kL'].forEach(id => { $(id, body).addEventListener('change', checkWarn); $(id, body).addEventListener('input', checkWarn); });
+  checkWarn();
   $('#kSave', body).onclick = async () => {
     const btn = $('#kSave', body); btn.disabled = true;
     const num = v => { const x = Number(String(v).trim().replace(',', '.')); return String(v).trim() === '' || !isFinite(x) || x < 0 ? null : x; };

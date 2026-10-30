@@ -457,3 +457,35 @@ body { background: var(--bg) linear-gradient(180deg, #E7EFF1 0, var(--bg) 340px)
 .ins .bar i.top { background: var(--sand); }
 .ins .bar span:last-child { text-align: right; color: var(--mute); }
 .ins .best { font-size: 12.5px; margin-top: 8px; color: var(--ink); }
+
+/* Tilalmi idők */
+.season-today { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 760px) { .season-today { grid-template-columns: repeat(2, minmax(0, 1fr)); } .season-today .card + .card { margin-top: 0; } }
+.season-today h2 { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 18px; }
+.st-now { border-color: #F0C8C4; }
+.season-cal { position: relative; padding: 14px 14px 10px; overflow-x: auto; }
+.sc-row { display: grid; grid-template-columns: 112px minmax(420px, 1fr); align-items: center; gap: 10px; min-height: 30px; }
+.sc-row > span { font-size: 13.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sc-row.on > span { color: var(--bad); font-weight: 700; }
+.sc-track { position: relative; height: 14px; border-radius: 999px; background: repeating-linear-gradient(90deg, var(--bg) 0, var(--bg) calc(100% / 12 - 1px), var(--line) calc(100% / 12 - 1px), var(--line) calc(100% / 12)); }
+.sc-track i { position: absolute; top: 0; bottom: 0; border-radius: 999px; background: var(--lake); animation: grow .7s ease both; transform-origin: left; }
+.sc-row.on .sc-track i { background: var(--bad); }
+.sc-head .sc-track { position: relative; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); background: none; height: auto; }
+.sc-head .sc-track b { font-size: 11px; font-weight: 600; color: var(--mute); text-align: center; text-transform: capitalize; }
+.sc-now { position: absolute; top: -8px; bottom: -8px; width: 2px; margin-left: -1px; background: var(--sand); z-index: 1; }
+.sc-head .sc-now { top: auto; bottom: -10px; height: 12px; }
+.sc-now span { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); font-size: 10.5px; font-weight: 700; font-style: normal; color: #7A5410; background: var(--sand-l); padding: 0 5px; border-radius: 6px; white-space: nowrap; }
+.sc-head { margin-bottom: 4px; padding-top: 16px; }
+.tbl-wrap { overflow-x: auto; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
+.tbl th { text-align: left; font-size: 12.5px; color: var(--mute); font-weight: 600; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+.tbl td { padding: 10px; border-bottom: 1px solid var(--line); }
+.tbl tr.on td { background: var(--bad-l); color: var(--bad); font-weight: 600; }
+.season-home { display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin: -4px 0 18px; background: var(--card); border: 1px solid var(--line); border-radius: var(--r); text-decoration: none; color: var(--ink); box-shadow: var(--shadow); animation: fadeUp .45s .08s ease both; }
+.season-home:hover { border-color: var(--lake); color: var(--ink); }
+.sh-ic { width: 40px; height: 40px; flex-shrink: 0; border-radius: 12px; background: var(--bad-l); color: var(--bad); display: flex; align-items: center; justify-content: center; }
+.sh-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1 1 auto; }
+.sh-body .chips { gap: 4px; }
+.sh-body .chip { font-size: 12px; padding: 3px 9px; }
+.sh-more { font-size: 13px; font-weight: 600; color: var(--lake-d); white-space: nowrap; }
+@media (max-width: 420px) { .sh-more { display: none; } }
