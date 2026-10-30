@@ -54,12 +54,14 @@ export async function render(el, _p, ctx) {
       <label class="field"><span>${esc(t('name'))}</span><input id="rName" autocomplete="name" maxlength="80"></label>
       <label class="field"><span>${esc(t('email'))}</span><input id="rEmail" type="email" autocomplete="email"></label>
       <label class="field"><span>${esc(t('password'))}</span><input id="rPw" type="password" autocomplete="new-password" minlength="6"></label>
+      <label class="check small"><input type="checkbox" id="rTerms"><span>${esc(t('accept_terms'))} (<a href="#/uslovi" target="_blank">${esc(t('terms'))}</a>, <a href="#/privatnost" target="_blank">${esc(t('privacy'))}</a>)</span></label>
       <div class="err" id="rErr"></div>
       <button class="btn lake block" id="rGo">${esc(t('register'))}</button>`;
     $('#rGo').onclick = async () => {
       const name = $('#rName').value.trim(), email = $('#rEmail').value.trim(), pw = $('#rPw').value;
       const role = f.querySelector('input[name=role]:checked').value;
       if (!name || !email || pw.length < 6) { $('#rErr').textContent = t('fill_all'); return; }
+      if (!$('#rTerms').checked) { $('#rErr').textContent = t('must_accept'); return; }
       $('#rGo').disabled = true;
       const { data, error } = await sb.auth.signUp({ email, password: pw, options: { data: { display_name: name, role, lang: lang() }, emailRedirectTo: location.origin + location.pathname } });
       $('#rGo').disabled = false;

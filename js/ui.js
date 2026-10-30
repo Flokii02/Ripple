@@ -114,6 +114,8 @@ const I = {
   gauge: '<path d="M12 14l4-4"/><path d="M4 18a9 9 0 1 1 16 0"/>',
   sunrise: '<path d="M12 3v5M8 6l4-3 4 3M3 20h18M6 16a6 6 0 0 1 12 0"/>',
   moonph: '<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16Z" fill="currentColor"/>',
+  share: '<circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4"/>',
+  mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
   lake: '<path d="M3 15c3-2 6 2 9 0s6 2 9 0M3 19c3-2 6 2 9 0s6 2 9 0"/><path d="M8 11c0-3 2-6 4-7 2 1 4 4 4 7"/>'
 };
 export function icon(name, size = 20) {
@@ -124,4 +126,25 @@ export function icon(name, size = 20) {
 export function logoMark(size = 28, light = false) {
   const ink = light ? '#FFFFFF' : '#0E2A3B', ring = light ? '#FFFFFF' : '#1F7A8C';
   return `<svg width="${size}" height="${size}" viewBox="0 0 64 64" aria-hidden="true"><line x1="32" y1="4" x2="32" y2="15" stroke="${ink}" stroke-width="3" stroke-linecap="round"/><path d="M23 28 A9 13 0 0 1 41 28 Z" fill="#E2A73E"/><path d="M23 28 A9 13 0 0 0 41 28 Z" fill="${ink}"/><ellipse cx="32" cy="46" rx="16" ry="4" fill="none" stroke="${ring}" stroke-width="2.8" opacity="0.8"/><ellipse cx="32" cy="48" rx="27" ry="7" fill="none" stroke="${ring}" stroke-width="2.4" opacity="0.4"/></svg>`;
+}
+
+// Megosztás: a telefon saját megosztója, különben Viber / WhatsApp / Facebook / link
+export function shareUrl(params) {
+  return location.origin + location.pathname + '?' + params;
+}
+export function share({ title, text, url }) {
+  const msg = `${text || title} ${url}`;
+  if (navigator.share) { navigator.share({ title, text: text || title, url }).catch(() => {}); return; }
+  const enc = encodeURIComponent;
+  const body = openModal(t('share'), `
+    <div class="contact-btns">
+      <a class="btn ghost block" href="viber://forward?text=${enc(msg)}">Viber</a>
+      <a class="btn ghost block" href="https://wa.me/?text=${enc(msg)}" target="_blank" rel="noopener">WhatsApp</a>
+      <a class="btn ghost block" href="https://www.facebook.com/sharer/sharer.php?u=${enc(url)}" target="_blank" rel="noopener">Facebook</a>
+      <button class="btn lake block" id="shCopy">${esc(t('copy_link'))}</button>
+    </div>`);
+  $('#shCopy', body).onclick = async () => {
+    try { await navigator.clipboard.writeText(url); } catch (e) { const i = document.createElement('input'); i.value = url; document.body.appendChild(i); i.select(); document.execCommand('copy'); i.remove(); }
+    toast(t('link_copied')); closeModal();
+  };
 }

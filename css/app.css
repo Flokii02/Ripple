@@ -335,3 +335,19 @@ input[type=search] { -webkit-appearance: none; appearance: none; }
   .wx-wide > .small { grid-area: src; }
   .wx-wide > .spinner, .wx-wide > p { grid-column: 1 / -1; }
 }
+
+/* Statisztika, átkérés, lábléc */
+.stat-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 14px; }
+.stat-mini { background: var(--bg); border-radius: 12px; padding: 10px 12px; }
+.stat-mini small { display: block; color: var(--mute); font-size: 12px; font-weight: 600; }
+.stat-mini b { font: 600 20px var(--display); }
+.mini-chart { display: flex; align-items: flex-end; gap: 3px; height: 90px; margin-bottom: 6px; }
+.mini-chart span { flex: 1 1 0; background: var(--lake); border-radius: 3px 3px 0 0; min-height: 3px; }
+.mini-chart span.zero { background: var(--line); }
+.claim-card { margin-top: 14px; }
+.site-footer { max-width: 1180px; margin: 0 auto; padding: 18px 16px 30px; display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; justify-content: center; color: var(--mute); font-size: 13.5px; border-top: 1px solid var(--line); }
+.site-footer a { color: var(--ink-2); text-decoration: none; padding: 6px 0; }
+.site-footer a:hover { color: var(--lake-d); text-decoration: underline; }
+.legal h2 { margin: 22px 0 8px; font-size: 18px; }
+.legal p, .legal li { color: var(--ink-2); }
+.legal ul { padding-left: 20px; }

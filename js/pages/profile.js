@@ -15,6 +15,7 @@ export async function render(el, _p, ctx) {
       ${p.role === 'owner' || ctx.isAdmin ? `<a href="#/moja-jezera">${icon('lake')}${esc(t('my_lakes'))}</a>` : `<button id="pSuggest">${icon('plus')}${esc(t('suggest_lake'))}</button>`}
       <a href="#/takmicenja">${icon('trophy')}${esc(t('nav_comp'))}</a>
       ${ctx.isAdmin ? `<a href="#/admin">${icon('shield')}${esc(t('nav_admin'))}</a>` : ''}
+      <a href="#/o-nama">${icon('mail')}${esc(t('about'))}</a>
     </div></div>
     <div class="card">
       <label class="field"><span>${esc(t('name'))}</span><input id="pName" maxlength="80" value="${esc(p.display_name || '')}"></label>

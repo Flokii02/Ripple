@@ -1,6 +1,6 @@
 import { sb } from '../config.js';
 import { t, speciesName } from '../i18n.js';
-import { $, $$, esc, icon, fmtMoney, fmtDate, lakePhotoUrl, catchPhotoUrls, todayStr, toast } from '../ui.js';
+import { $, $$, esc, icon, fmtMoney, fmtDate, lakePhotoUrl, catchPhotoUrls, todayStr, toast, share, shareUrl, openModal, closeModal } from '../ui.js';
 import { renderWeatherCard } from '../weather.js';
 import { go } from '../app.js';
 
@@ -16,6 +16,11 @@ export async function render(el, [slug], ctx) {
     ctx.user ? sb.from('favorites').select('lake_id').eq('lake_id', lake.id).eq('user_id', ctx.user.id).maybeSingle() : Promise.resolve({ data: null })
   ]);
   const revs = reviews || [];
+  let claim = null;
+  if (ctx.user && lake.owner_id !== ctx.user.id) {
+    const { data: cl } = await sb.from('lake_claims').select('id').eq('lake_id', lake.id).eq('user_id', ctx.user.id).eq('status', 'pending').maybeSingle();
+    claim = cl;
+  }
   const avg = revs.length ? revs.reduce((a, r) => a + r.rating, 0) / revs.length : 0;
   const mine = ctx.user ? revs.find(r => r.user_id === ctx.user.id) : null;
   const isOwner = ctx.user && lake.owner_id === ctx.user.id;
@@ -41,6 +46,7 @@ export async function render(el, [slug], ctx) {
         ${revs.length ? `<button class="rating-sum" id="toReviews">${stars(avg)}<b>${avg.toFixed(1).replace('.', ',')}</b><span>(${revs.length} ${esc(t('reviews_n'))})</span></button>` : ''}
       </div>
       <div class="row">
+        <button class="fav-btn" id="shareBtn">${icon('share', 18)}<span>${esc(t('share'))}</span></button>
         <button class="fav-btn ${isFav ? 'on' : ''}" id="favBtn" aria-pressed="${isFav}" aria-label="${esc(isFav ? t('fav_remove') : t('fav_add'))}">${icon('heart', 20)}<span>${esc(t('fav'))}</span></button>
         ${canEdit ? `<a class="btn ghost sm" href="#/moja-jezera/${lake.id}">${icon('edit', 16)}${esc(t('edit'))}</a>` : ''}
       </div>
@@ -102,15 +108,17 @@ export async function render(el, [slug], ctx) {
         <div class="card">
           <h2 style="margin-bottom:12px">${esc(t('contact'))}</h2>
           <div class="contact-btns">
-            ${tel ? `<a class="btn lake block" href="tel:${esc(tel)}">${icon('phone', 18)}${esc(t('call'))} · ${esc(lake.phone)}</a>` : ''}
-            ${lake.lat && lake.lng ? `<a class="btn ghost block" href="https://www.google.com/maps/dir/?api=1&destination=${lake.lat},${lake.lng}" target="_blank" rel="noopener">${icon('nav', 18)}${esc(t('directions'))}</a>` : ''}
-            ${lake.website ? `<a class="btn ghost block" href="${esc(linkify(lake.website))}" target="_blank" rel="noopener">${icon('globe', 18)}${esc(t('website'))}</a>` : ''}
-            ${lake.facebook ? `<a class="btn ghost block" href="${esc(linkify(lake.facebook, 'https://facebook.com/'))}" target="_blank" rel="noopener">Facebook</a>` : ''}
-            ${lake.instagram ? `<a class="btn ghost block" href="${esc(linkify(lake.instagram, 'https://instagram.com/'))}" target="_blank" rel="noopener">Instagram</a>` : ''}
+            ${tel ? `<a class="btn lake block" data-track="call" href="tel:${esc(tel)}">${icon('phone', 18)}${esc(t('call'))} · ${esc(lake.phone)}</a>` : ''}
+            ${lake.lat && lake.lng ? `<a class="btn ghost block" data-track="directions" href="https://www.google.com/maps/dir/?api=1&destination=${lake.lat},${lake.lng}" target="_blank" rel="noopener">${icon('nav', 18)}${esc(t('directions'))}</a>` : ''}
+            ${lake.website ? `<a class="btn ghost block" data-track="website" href="${esc(linkify(lake.website))}" target="_blank" rel="noopener">${icon('globe', 18)}${esc(t('website'))}</a>` : ''}
+            ${lake.facebook ? `<a class="btn ghost block" data-track="social" href="${esc(linkify(lake.facebook, 'https://facebook.com/'))}" target="_blank" rel="noopener">Facebook</a>` : ''}
+            ${lake.instagram ? `<a class="btn ghost block" data-track="social" href="${esc(linkify(lake.instagram, 'https://instagram.com/'))}" target="_blank" rel="noopener">Instagram</a>` : ''}
           </div>
           ${lake.opening ? `<div style="margin-top:14px"><div class="small muted" style="font-weight:600">${esc(t('opening'))}</div><p class="prose">${esc(lake.opening)}</p></div>` : ''}
           ${lake.lat && lake.lng ? `<div class="mini-map" id="miniMap"></div>` : ''}
         </div>
+        ${!isOwner && !(ctx.user && claim) ? `<div class="card claim-card"><b>${esc(t('claim_q'))}</b><p class="small muted" style="margin:4px 0 10px">${esc(t('claim_hint'))}</p><button class="btn ghost block" id="claimBtn">${esc(t('claim_btn'))}</button></div>`
+          : !isOwner && claim ? `<div class="card claim-card small muted">${esc(t('claim_pending'))}</div>` : ''}
       </aside>
     </div>
   </div>`;
@@ -123,6 +131,33 @@ export async function render(el, [slug], ctx) {
   document.title = `${lake.name} – Ripple`;
 
   if ($('#toReviews')) $('#toReviews').onclick = () => $('#reviews').scrollIntoView({ behavior: 'smooth' });
+
+  // Statisztika: megtekintés (munkamenetenként egyszer) és kattintások
+  const track = kind => sb.rpc('track_lake', { p_lake: lake.id, p_kind: kind }).then(() => {}, () => {});
+  try { const k = 'rv_' + lake.id; if (!sessionStorage.getItem(k)) { sessionStorage.setItem(k, '1'); track('view'); } } catch (e) { track('view'); }
+  $$('[data-track]').forEach(a => a.addEventListener('click', () => track(a.dataset.track)));
+
+  // Megosztás
+  $('#shareBtn').onclick = () => { track('share'); share({ title: lake.name, text: `${lake.name}${lake.place ? ' – ' + lake.place : ''} | Ripple`, url: shareUrl('jezero=' + encodeURIComponent(lake.slug)) }); };
+
+  // Tulajdonosi kérés
+  if ($('#claimBtn')) $('#claimBtn').onclick = () => {
+    if (!ctx.user) { toast(t('need_login'), 'err'); go('/prijava'); return; }
+    const body = openModal(t('claim_btn'), `
+      <p class="muted" style="margin-top:0">${esc(t('claim_hint'))}</p>
+      <label class="field"><span>${esc(t('phone'))}</span><input id="clPhone" type="tel" maxlength="40"></label>
+      <label class="field"><span>${esc(t('message'))}</span><textarea id="clMsg" maxlength="1000"></textarea></label>
+      <div class="err" id="clErr"></div>
+      <div class="row"><button class="btn ghost" id="clCancel">${esc(t('cancel'))}</button><button class="btn lake grow" id="clSend">${esc(t('send'))}</button></div>`);
+    $('#clCancel', body).onclick = closeModal;
+    $('#clSend', body).onclick = async () => {
+      const phone = $('#clPhone', body).value.trim();
+      if (phone.replace(/\D/g, '').length < 6) { $('#clErr', body).textContent = t('phone'); return; }
+      const { error } = await sb.from('lake_claims').insert({ lake_id: lake.id, user_id: ctx.user.id, phone, message: $('#clMsg', body).value.trim() || null });
+      if (error) { console.error(error); $('#clErr', body).textContent = t('error'); return; }
+      closeModal(); toast(t('claim_sent')); render(el, [slug], ctx);
+    };
+  };
 
   // Kedvenc
   $('#favBtn').onclick = async () => {

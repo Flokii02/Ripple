@@ -1,6 +1,6 @@
 import { sb } from '../config.js';
 import { t } from '../i18n.js';
-import { $, esc, icon, fmtDate, fmtMonth, fmtMoney, todayStr, openModal, closeModal, toast, spinner } from '../ui.js';
+import { $, $$, esc, icon, fmtDate, fmtMonth, fmtMoney, todayStr, openModal, closeModal, toast, spinner, share, shareUrl } from '../ui.js';
 import { go } from '../app.js';
 
 let mode = 'upcoming';
@@ -34,6 +34,7 @@ export async function render(el, _p, ctx) {
       html += compCard(c);
     });
     $('#list').innerHTML = html;
+    $$('[data-sharecomp]').forEach(b => b.onclick = () => { const [title, d] = b.dataset.sharecomp.split('|'); share({ title, text: `${title} – ${fmtDate(d)} | Ripple`, url: shareUrl('takmicenja') }); });
   };
 
   // A saját, még jóváhagyásra váró versenyek
@@ -59,6 +60,7 @@ function compCard(c, mine = false) {
       <div class="row" style="margin-top:6px">${c.entry_fee ? `<span class="chip sand">${esc(fmtMoney(c.entry_fee))}</span>` : ''}${mine ? `<span class="chip ${c.status === 'rejected' ? 'bad' : 'warn'}">${esc(t(c.status))}</span>` : ''}</div>
       ${c.description ? `<p>${esc(c.description)}</p>` : ''}
       ${c.contact ? `<p>${icon('phone', 14)} ${esc(c.contact)}</p>` : ''}
+      ${mine ? '' : `<button class="btn ghost sm" style="margin-top:8px" data-sharecomp="${esc(c.title)}|${esc(c.date_start)}">${icon('share', 15)}${esc(t('share'))}</button>`}
     </div></div>`;
 }
 

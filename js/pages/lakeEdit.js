@@ -63,6 +63,7 @@ export async function render(el, [idParam], ctx) {
     </div>
 
     ${isNew ? `<div class="notice info" style="margin-top:14px">${esc(t('save_first'))}</div>` : `
+    <div class="section"><h2>${esc(t('stats'))}</h2><div class="card" id="statsBox"></div></div>
     <div class="section"><h2>${esc(t('photos'))}</h2>
       <div class="card">
         <div class="photo-grid" id="photos"></div>
@@ -137,6 +138,24 @@ export async function render(el, [idParam], ctx) {
     }
   };
   if (isNew) return;
+
+  // Statisztika az elmúlt 30 napról
+  (async () => {
+    const from = new Date(); from.setDate(from.getDate() - 29);
+    const fromStr = `${from.getFullYear()}-${String(from.getMonth() + 1).padStart(2, '0')}-${String(from.getDate()).padStart(2, '0')}`;
+    const { data } = await sb.from('lake_stats').select('day, kind, n').eq('lake_id', lake.id).gte('day', fromStr);
+    const rows = data || [];
+    const box = $('#statsBox');
+    if (!rows.length) { box.innerHTML = `<div class="muted small">${esc(t('stats_empty'))}</div>`; return; }
+    const sum = k => rows.filter(r => r.kind === k).reduce((a, r) => a + r.n, 0);
+    const days = [...Array(30)].map((_, i) => { const d = new Date(from); d.setDate(from.getDate() + i); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; });
+    const views = days.map(d => rows.filter(r => r.day === d && r.kind === 'view').reduce((a, r) => a + r.n, 0));
+    const max = Math.max(1, ...views);
+    box.innerHTML = `
+      <div class="stat-row">${['view', 'call', 'directions', 'website', 'social', 'share'].map(k => `<div class="stat-mini"><small>${esc(t('st_' + k))}</small><b>${sum(k)}</b></div>`).join('')}</div>
+      <div class="mini-chart" role="img" aria-label="${esc(t('st_view'))}">${views.map((v, i) => `<span title="${days[i]}: ${v}" style="height:${Math.max(3, Math.round(v / max * 100))}%" class="${v ? '' : 'zero'}"></span>`).join('')}</div>
+      <div class="row small muted" style="justify-content:space-between"><span>${esc(fmtDate(days[0]))}</span><span>${esc(fmtDate(days[29]))}</span></div>`;
+  })();
 
   // Fotók
   const loadPhotos = async () => {

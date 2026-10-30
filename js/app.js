@@ -31,7 +31,9 @@ const ROUTES = [
   [/^\/admin$/, 'admin'],
   [/^\/prijava$/, 'auth'],
   [/^\/profil$/, 'profile'],
-  [/^\/omiljena$/, 'favorites']
+  [/^\/omiljena$/, 'favorites'],
+  [/^\/o-nama$/, 'about'],
+  [/^\/(privatnost|uslovi)$/, 'legal']
 ];
 const PAGES = {
   home: () => import('./pages/home.js'),
@@ -43,7 +45,9 @@ const PAGES = {
   admin: () => import('./pages/admin.js'),
   auth: () => import('./pages/auth.js'),
   profile: () => import('./pages/profile.js'),
-  favorites: () => import('./pages/favorites.js')
+  favorites: () => import('./pages/favorites.js'),
+  about: () => import('./pages/about.js'),
+  legal: () => import('./pages/legal.js')
 };
 
 export function go(path) { location.hash = '#' + path; }
@@ -85,6 +89,7 @@ function renderNav(active) {
   $('#topNav').innerHTML = tabs.map(([n, p, ic, label]) =>
     `<a href="#${p}" class="tn ${isActive(n) ? 'on' : ''}" ${isActive(n) ? 'aria-current="page"' : ''}>${esc(label)}</a>`).join('')
     + `<button class="lang-btn" id="langBtn" aria-label="${esc(t('language'))}">${lang() === 'hu' ? 'SR' : 'HU'}</button>`;
+  $('#footer').innerHTML = `<a href="#/o-nama">${esc(t('about'))}</a><a href="#/privatnost">${esc(t('privacy'))}</a><a href="#/uslovi">${esc(t('terms'))}</a><span>© ${new Date().getFullYear()} Ripple</span>`;
   $('#tabBar').innerHTML = tabs.map(([n, p, ic, label]) =>
     `<a href="#${p}" class="tb ${isActive(n) ? 'on' : ''}" ${isActive(n) ? 'aria-current="page"' : ''}>${icon(ic, 22)}<span>${esc(label)}</span></a>`).join('');
   $('#langBtn').onclick = async () => {
@@ -101,6 +106,10 @@ async function init() {
   $('#modalClose').onclick = closeModal;
   $('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+  // Megosztott linkek: ?jezero=<slug> vagy ?takmicenja -> belső oldal
+  const qs = new URLSearchParams(location.search);
+  if (qs.get('jezero') && /^[a-z0-9-]+$/.test(qs.get('jezero'))) { history.replaceState(null, '', location.pathname + '#/jezero/' + qs.get('jezero')); }
+  else if (qs.has('takmicenja')) { history.replaceState(null, '', location.pathname + '#/takmicenja'); }
   await loadSession();
   sb.auth.onAuthStateChange(async (ev) => {
     if (ev === 'SIGNED_IN' || ev === 'SIGNED_OUT' || ev === 'USER_UPDATED') { await loadSession(); route(); }

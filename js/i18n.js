@@ -42,6 +42,13 @@ const DICT = {
     suggest_lake: 'Predloži jezero', suggest_hint: 'Znate jezero koje još nije na Ripple-u? Pošaljite nam ga, a mi ćemo kontaktirati vlasnika.', suggest_contact: 'Kontakt vlasnika (ako znate)',
     suggest_send: 'Pošalji predlog', suggest_sent: 'Hvala! Predlog je poslat.', owners_only: 'Jezera mogu da dodaju samo vlasnici jezera. Ako znate jezero koje nedostaje, predložite ga.',
     owner_cta_angler: 'Znate jezero koje nedostaje? Predložite ga, a vlasnici se mogu registrovati besplatno.', suggestions: 'Predlozi jezera', owner_register: 'Registracija za vlasnike',
+    share: 'Podeli', copy_link: 'Kopiraj link', link_copied: 'Link je kopiran.',
+    claim_q: 'Vi ste vlasnik ovog jezera?', claim_btn: 'Ovo je moje jezero', claim_hint: 'Pošaljite zahtev. Nakon provere preuzimate upravljanje stranicom jezera.',
+    claim_sent: 'Zahtev je poslat. Javićemo vam se.', claim_pending: 'Vaš zahtev čeka proveru.', claims: 'Zahtevi vlasnika',
+    stats: 'Statistika (30 dana)', st_view: 'Pregledi', st_call: 'Pozivi', st_directions: 'Putanja', st_website: 'Sajt', st_social: 'Društvene mreže', st_share: 'Deljenja',
+    stats_empty: 'Statistika se prikazuje kada jezero bude odobreno i posećeno.',
+    about: 'O nama', privacy: 'Privatnost', terms: 'Uslovi korišćenja', contact_us: 'Kontaktirajte nas', message: 'Poruka', send: 'Pošalji', sent_ok: 'Poruka je poslata. Hvala!',
+    accept_terms: 'Prihvatam uslove korišćenja i politiku privatnosti', must_accept: 'Potrebno je da prihvatite uslove.', messages: 'Poruke',
     only_favs: 'Omiljena', last_stock: 'Poslednje poribljavanje', next_comp: 'Sledeće takmičenje',
     install: 'Instaliraj aplikaciju', kg: 'kg', cm: 'cm', from: 'od'
   },
@@ -87,6 +94,13 @@ const DICT = {
     suggest_lake: 'Tó javaslása', suggest_hint: 'Ismersz egy tavat, ami még nincs fent a Ripple-ön? Küldd el, és felvesszük a kapcsolatot a tulajdonossal.', suggest_contact: 'A tulajdonos elérhetősége (ha tudod)',
     suggest_send: 'Javaslat küldése', suggest_sent: 'Köszönjük! A javaslatot elküldtük.', owners_only: 'Tavat csak tótulajdonosok adhatnak hozzá. Ha ismersz egy hiányzó tavat, javasold.',
     owner_cta_angler: 'Ismersz egy tavat, ami hiányzik? Javasold, a tulajdonosok pedig ingyen regisztrálhatnak.', suggestions: 'Tó-javaslatok', owner_register: 'Regisztráció tulajdonosoknak',
+    share: 'Megosztás', copy_link: 'Link másolása', link_copied: 'Link kimásolva.',
+    claim_q: 'Te vagy ennek a tónak a tulajdonosa?', claim_btn: 'Ez az én tavam', claim_hint: 'Küldj kérést. Ellenőrzés után te kezelheted a tó oldalát.',
+    claim_sent: 'A kérést elküldtük. Jelentkezünk.', claim_pending: 'A kérésed ellenőrzésre vár.', claims: 'Tulajdonosi kérések',
+    stats: 'Statisztika (30 nap)', st_view: 'Megtekintés', st_call: 'Hívás', st_directions: 'Útvonal', st_website: 'Weboldal', st_social: 'Közösségi oldal', st_share: 'Megosztás',
+    stats_empty: 'A statisztika akkor jelenik meg, ha a tavat jóváhagyták és meglátogatták.',
+    about: 'Rólunk', privacy: 'Adatvédelem', terms: 'Felhasználási feltételek', contact_us: 'Írj nekünk', message: 'Üzenet', send: 'Küldés', sent_ok: 'Az üzenetet elküldtük. Köszönjük!',
+    accept_terms: 'Elfogadom a felhasználási feltételeket és az adatvédelmi tájékoztatót', must_accept: 'El kell fogadnod a feltételeket.', messages: 'Üzenetek',
     only_favs: 'Kedvencek', last_stock: 'Utolsó telepítés', next_comp: 'Következő verseny',
     install: 'Alkalmazás telepítése', kg: 'kg', cm: 'cm', from: 'tól'
   }
