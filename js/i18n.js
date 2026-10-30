@@ -31,6 +31,14 @@ const DICT = {
     save_first: 'Sačuvajte jezero da biste dodali fotografije i poribljavanja.', status_pending_lake: 'Jezero čeka odobrenje i još nije javno.',
     view_page: 'Pogledaj stranicu', admin_title: 'Odobravanje', approve: 'Odobri', reject: 'Odbij', plan: 'Paket', all_lakes: 'Sva jezera',
     nothing_pending: 'Nema ničeg na čekanju.', not_found: 'Stranica nije pronađena.', need_login: 'Za ovo je potrebna prijava.',
+    wx_title: 'Vreme na jezeru', wx_feels: 'Oseća se kao', wx_wind: 'Vetar', wx_pressure: 'Pritisak', wx_rain: 'Kiša', wx_moon: 'Mesec',
+    wx_sunrise: 'Izlazak sunca', wx_sunset: 'Zalazak sunca', wx_err: 'Vremenska prognoza trenutno nije dostupna.', wx_noloc: 'Jezero nema lokaciju na mapi, pa nema prognoze.',
+    p_up: 'raste', p_down: 'pada', p_flat: 'stabilan',
+    bite: 'Šansa za ulov danas', bite_good: 'Dobra', bite_mid: 'Srednja', bite_low: 'Slabija', bite_note: 'Gruba procena na osnovu pritiska, vetra, temperature i meseca.',
+    reviews: 'Ocene', review_add: 'Oceni jezero', review_your: 'Vaša ocena', review_text: 'Komentar (opciono)', review_none: 'Još nema ocena. Budite prvi!',
+    review_owner: 'Vlasnik ne može da oceni svoje jezero.', reviews_n: 'ocena', rating: 'Ocena',
+    fav: 'Omiljeno', fav_add: 'Dodaj u omiljena', fav_remove: 'Ukloni iz omiljenih', favs: 'Omiljena jezera', favs_empty: 'Još nemate omiljena jezera. Dodajte ih srcem na stranici jezera.',
+    only_favs: 'Omiljena', last_stock: 'Poslednje poribljavanje', next_comp: 'Sledeće takmičenje',
     install: 'Instaliraj aplikaciju', kg: 'kg', cm: 'cm', from: 'od'
   },
   hu: {
@@ -64,6 +72,14 @@ const DICT = {
     save_first: 'Mentsd el a tavat, utána adhatsz hozzá fotókat és telepítést.', status_pending_lake: 'A tó jóváhagyásra vár, még nem nyilvános.',
     view_page: 'Oldal megtekintése', admin_title: 'Jóváhagyás', approve: 'Jóváhagy', reject: 'Elutasít', plan: 'Csomag', all_lakes: 'Minden tó',
     nothing_pending: 'Nincs semmi jóváhagyásra váró.', not_found: 'Az oldal nem található.', need_login: 'Ehhez be kell lépni.',
+    wx_title: 'Időjárás a tónál', wx_feels: 'Hőérzet', wx_wind: 'Szél', wx_pressure: 'Légnyomás', wx_rain: 'Eső', wx_moon: 'Hold',
+    wx_sunrise: 'Napkelte', wx_sunset: 'Napnyugta', wx_err: 'Az időjárás most nem érhető el.', wx_noloc: 'A tónak nincs helye a térképen, ezért nincs előrejelzés.',
+    p_up: 'emelkedik', p_down: 'csökken', p_flat: 'stabil',
+    bite: 'Kapás-esély ma', bite_good: 'Jó', bite_mid: 'Közepes', bite_low: 'Gyengébb', bite_note: 'Durva becslés a légnyomás, szél, hőmérséklet és a hold alapján.',
+    reviews: 'Értékelések', review_add: 'Értékeld a tavat', review_your: 'Az értékelésed', review_text: 'Vélemény (nem kötelező)', review_none: 'Még nincs értékelés. Légy az első!',
+    review_owner: 'A tulajdonos nem értékelheti a saját tavát.', reviews_n: 'értékelés', rating: 'Értékelés',
+    fav: 'Kedvenc', fav_add: 'Kedvencekhez', fav_remove: 'Eltávolítás a kedvencekből', favs: 'Kedvenc tavaim', favs_empty: 'Még nincs kedvenc tavad. A tó oldalán a szívvel adhatod hozzá.',
+    only_favs: 'Kedvencek', last_stock: 'Utolsó telepítés', next_comp: 'Következő verseny',
     install: 'Alkalmazás telepítése', kg: 'kg', cm: 'cm', from: 'tól'
   }
 };

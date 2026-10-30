@@ -30,7 +30,8 @@ const ROUTES = [
   [/^\/moja-jezera\/(novo|\d+)$/, 'lakeEdit'],
   [/^\/admin$/, 'admin'],
   [/^\/prijava$/, 'auth'],
-  [/^\/profil$/, 'profile']
+  [/^\/profil$/, 'profile'],
+  [/^\/omiljena$/, 'favorites']
 ];
 const PAGES = {
   home: () => import('./pages/home.js'),
@@ -41,7 +42,8 @@ const PAGES = {
   lakeEdit: () => import('./pages/lakeEdit.js'),
   admin: () => import('./pages/admin.js'),
   auth: () => import('./pages/auth.js'),
-  profile: () => import('./pages/profile.js')
+  profile: () => import('./pages/profile.js'),
+  favorites: () => import('./pages/favorites.js')
 };
 
 export function go(path) { location.hash = '#' + path; }
@@ -79,7 +81,7 @@ function renderNav(active) {
     ['log', '/dnevnik', 'book', t('nav_log')],
     ctx.user ? ['profile', '/profil', 'user', t('nav_profile')] : ['auth', '/prijava', 'user', t('nav_login')]
   ];
-  const isActive = n => n === active || (n === 'home' && active === 'lake') || (n === 'profile' && ['owner', 'lakeEdit', 'admin'].includes(active));
+  const isActive = n => n === active || (n === 'home' && active === 'lake') || (n === 'profile' && ['owner', 'lakeEdit', 'admin', 'favorites'].includes(active));
   $('#topNav').innerHTML = tabs.map(([n, p, ic, label]) =>
     `<a href="#${p}" class="tn ${isActive(n) ? 'on' : ''}" ${isActive(n) ? 'aria-current="page"' : ''}>${esc(label)}</a>`).join('')
     + `<button class="lang-btn" id="langBtn" aria-label="${esc(t('language'))}">${lang() === 'hu' ? 'SR' : 'HU'}</button>`;

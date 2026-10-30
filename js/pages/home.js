@@ -1,11 +1,13 @@
 import { sb, MAP_CENTER, MAP_ZOOM } from '../config.js';
 import { t, SPECIES, speciesName } from '../i18n.js';
-import { $, esc, icon, fmtMoney, lakePhotoUrl, spinner } from '../ui.js';
+import { $, $$, esc, icon, fmtMoney, lakePhotoUrl, spinner } from '../ui.js';
+import { listWeather, wxInfo, wxIcon, trendArrow } from '../weather.js';
 
 let LAKES = [];
-const F = { q: '', species: '', night: false, acc: false, food: false, boat: false, view: 'list' };
+const F = { q: '', species: '', night: false, acc: false, food: false, boat: false, fav: false, view: 'list' };
+let WX = {};
 
-export async function render(el) {
+export async function render(el, _p, ctx) {
   el.innerHTML = `
   <div class="page">
     <div class="hero"><h1>${esc(t('nav_lakes'))}</h1><p>${esc(t('tagline'))}</p></div>
@@ -18,6 +20,7 @@ export async function render(el) {
           ${SPECIES.map(s => `<option value="${s.key}" ${F.species === s.key ? 'selected' : ''}>${esc(speciesName(s.key))}</option>`).join('')}
         </select>
         <div class="pick">
+          ${ctx.user ? `<label><input type="checkbox" id="fFav" ${F.fav ? 'checked' : ''}><span>${icon('heart', 15)}&nbsp;${esc(t('only_favs'))}</span></label>` : ''}
           <label><input type="checkbox" id="fNight" ${F.night ? 'checked' : ''}><span>${esc(t('f_night'))}</span></label>
           <label><input type="checkbox" id="fAcc" ${F.acc ? 'checked' : ''}><span>${esc(t('f_acc'))}</span></label>
           <label><input type="checkbox" id="fFood" ${F.food ? 'checked' : ''}><span>${esc(t('f_food'))}</span></label>
@@ -44,13 +47,15 @@ export async function render(el) {
     .eq('status', 'approved').order('name');
   if (error) { $('#list').innerHTML = `<div class="empty">${esc(t('error'))}</div>`; return; }
   LAKES = (data || []).map(l => ({ ...l, photo: (l.lake_photos || []).sort((a, b) => a.sort - b.sort)[0]?.path || null }));
+  let FAVS = new Set();
+  if (ctx.user) { const { data: fv } = await sb.from('favorites').select('lake_id').eq('user_id', ctx.user.id); FAVS = new Set((fv || []).map(f => f.lake_id)); }
 
   const apply = () => {
     const q = F.q.trim().toLowerCase();
     const list = LAKES.filter(l =>
       (!q || (l.name + ' ' + (l.place || '')).toLowerCase().includes(q)) &&
       (!F.species || (l.species || []).includes(F.species)) &&
-      (!F.night || l.night_fishing) && (!F.acc || l.accommodation) && (!F.food || l.food) && (!F.boat || l.boat)
+      (!F.fav || FAVS.has(l.id)) && (!F.night || l.night_fishing) && (!F.acc || l.accommodation) && (!F.food || l.food) && (!F.boat || l.boat)
     ).sort((a, b) => (b.plan !== 'free') - (a.plan !== 'free') || a.name.localeCompare(b.name));
     renderList(list);
     renderMarkers(list);
@@ -65,7 +70,7 @@ export async function render(el) {
         <div>
           ${l.plan !== 'free' ? `<span class="chip sand" style="font-size:11px;padding:2px 8px">${esc(t('featured'))}</span>` : ''}
           <h3>${esc(l.name)}</h3>
-          <div class="meta">${l.place ? `<span>${esc(l.place)}</span>` : ''}${l.price_day ? `<span><b>${esc(fmtMoney(l.price_day))}</b> / ${esc(t('per_day'))}</span>` : ''}</div>
+          <div class="meta">${l.place ? `<span>${esc(l.place)}</span>` : ''}<span class="wx-mini" data-wx="${l.id}">${wxMini(l.id)}</span>${l.price_day ? `<span><b>${esc(fmtMoney(l.price_day))}</b> / ${esc(t('per_day'))}</span>` : ''}</div>
           <div class="chips">${(l.species || []).slice(0, 4).map(s => `<span class="chip">${esc(speciesName(s))}</span>`).join('')}${l.night_fishing ? `<span class="chip gray">${icon('moon', 13)}${esc(t('f_night'))}</span>` : ''}</div>
         </div>
       </a>`).join('') + cta;
@@ -85,6 +90,7 @@ export async function render(el) {
 
   $('#q').addEventListener('input', e => { F.q = e.target.value; apply(); });
   $('#fSpecies').onchange = e => { F.species = e.target.value; apply(); };
+  if ($('#fFav')) $('#fFav').onchange = e => { F.fav = e.target.checked; apply(); };
   [['fNight', 'night'], ['fAcc', 'acc'], ['fFood', 'food'], ['fBoat', 'boat']].forEach(([id, k]) => { $('#' + id).onchange = e => { F[k] = e.target.checked; apply(); }; });
   const setView = v => {
     F.view = v; $('#split').dataset.view = v;
@@ -96,4 +102,14 @@ export async function render(el) {
   $('#vMap').onclick = () => setView('map');
   apply();
   setTimeout(() => map.invalidateSize(), 100);
+  // Időjárás a kártyákra (háttérben, nem lassítja a listát)
+  listWeather(LAKES.map(l => ({ id: l.id, lat: l.lat, lng: l.lng }))).then(w => {
+    WX = w; $$('[data-wx]').forEach(s => { s.innerHTML = wxMini(s.dataset.wx); });
+  }).catch(() => {});
+}
+
+function wxMini(id) {
+  const w = WX[id]; if (!w) return '';
+  const tr = trendArrow(w.trend);
+  return `${wxIcon(wxInfo(w.code).icon, 16)}${Math.round(w.temp)}° <span class="tr tr-${tr.k}" title="${esc(t('wx_pressure') + ': ' + t('p_' + tr.k))}">${tr.a}</span>`;
 }

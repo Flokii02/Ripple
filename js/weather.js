@@ -1,0 +1,126 @@
+// Időjárás az Open-Meteo ingyenes szolgáltatásából (kulcs nélkül), 30 perces gyorsítótárral
+import { lang } from './i18n.js';
+
+const API = 'https://api.open-meteo.com/v1/forecast';
+const TTL = 30 * 60 * 1000;
+
+function cacheGet(k) {
+  try { const v = JSON.parse(sessionStorage.getItem(k) || 'null'); return v && Date.now() - v.at < TTL ? v.data : null; } catch (e) { return null; }
+}
+function cacheSet(k, data) { try { sessionStorage.setItem(k, JSON.stringify({ at: Date.now(), data })); } catch (e) {} }
+
+// Egy tó részletes időjárása
+export async function lakeWeather(lat, lng) {
+  const key = `wx:${lat.toFixed(3)},${lng.toFixed(3)}`;
+  const hit = cacheGet(key); if (hit) return hit;
+  const u = `${API}?latitude=${lat}&longitude=${lng}&timezone=Europe%2FBelgrade&forecast_days=5&past_days=1`
+    + '&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,surface_pressure,precipitation,cloud_cover'
+    + '&hourly=surface_pressure'
+    + '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max,sunrise,sunset';
+  const r = await fetch(u);
+  if (!r.ok) throw new Error('weather');
+  const d = await r.json();
+  const out = {
+    now: d.current,
+    trend: pressureTrend(d.hourly, d.current.time),
+    daily: d.daily.time.map((day, i) => ({
+      day, code: d.daily.weather_code[i], max: d.daily.temperature_2m_max[i], min: d.daily.temperature_2m_min[i],
+      rain: d.daily.precipitation_probability_max[i], wind: d.daily.wind_speed_10m_max[i],
+      sunrise: d.daily.sunrise[i], sunset: d.daily.sunset[i]
+    })).filter(x => x.day >= d.current.time.slice(0, 10))
+  };
+  cacheSet(key, out);
+  return out;
+}
+
+// Több tó rövid időjárása a listához (egy kérésben)
+export async function listWeather(points) {
+  const pts = points.filter(p => p.lat && p.lng).slice(0, 60);
+  if (!pts.length) return {};
+  const key = 'wxl:' + pts.map(p => `${p.lat.toFixed(2)},${p.lng.toFixed(2)}`).join('|');
+  const hit = cacheGet(key); if (hit) return hit;
+  const u = `${API}?latitude=${pts.map(p => p.lat).join(',')}&longitude=${pts.map(p => p.lng).join(',')}`
+    + '&timezone=Europe%2FBelgrade&current=temperature_2m,weather_code,surface_pressure&hourly=surface_pressure&past_days=1&forecast_days=1';
+  const r = await fetch(u);
+  if (!r.ok) throw new Error('weather');
+  let d = await r.json();
+  if (!Array.isArray(d)) d = [d];
+  const out = {};
+  pts.forEach((p, i) => { const x = d[i]; if (x?.current) out[p.id] = { temp: x.current.temperature_2m, code: x.current.weather_code, trend: pressureTrend(x.hourly, x.current.time) }; });
+  cacheSet(key, out);
+  return out;
+}
+
+// Légnyomás változása az elmúlt 3 órában (hPa)
+function pressureTrend(hourly, nowIso) {
+  if (!hourly?.time) return 0;
+  const hour = nowIso.slice(0, 13);
+  const i = hourly.time.findIndex(x => x.slice(0, 13) === hour);
+  if (i < 3) return 0;
+  return Math.round((hourly.surface_pressure[i] - hourly.surface_pressure[i - 3]) * 10) / 10;
+}
+
+// Időjárás-kód -> ikon és szöveg
+export function wxInfo(code) {
+  const groups = [
+    [[0], 'sun', 'Vedro', 'Derült'], [[1, 2], 'cloudSun', 'Delimično oblačno', 'Részben felhős'], [[3], 'cloud', 'Oblačno', 'Borult'],
+    [[45, 48], 'fog', 'Magla', 'Köd'], [[51, 53, 55, 56, 57], 'rain', 'Rosulja', 'Szitálás'], [[61, 63, 65, 66, 67, 80, 81, 82], 'rain', 'Kiša', 'Eső'],
+    [[71, 73, 75, 77, 85, 86], 'snow', 'Sneg', 'Havazás'], [[95, 96, 99], 'storm', 'Grmljavina', 'Zivatar']
+  ];
+  const g = groups.find(x => x[0].includes(code)) || groups[2];
+  return { icon: g[1], text: lang() === 'hu' ? g[3] : g[2] };
+}
+
+const WI = {
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  cloudSun: '<path d="M12 4v1M5.6 6.6l.7.7M4 12h1M18.4 6.6l-.7.7"/><path d="M8.5 11.5a3.5 3.5 0 0 1 6.6-1.7"/><path d="M7 20h10a4 4 0 0 0 0-8 5 5 0 0 0-9.6 1.5A3.3 3.3 0 0 0 7 20Z"/>',
+  cloud: '<path d="M7 19h10a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.5 2A3.6 3.6 0 0 0 7 19Z"/>',
+  fog: '<path d="M7 13a5 5 0 0 1 9.6-1.5A3.5 3.5 0 0 1 17 18H7M4 21h16M6 16h4"/>',
+  rain: '<path d="M7 15h10a4 4 0 0 0 0-8 5.5 5.5 0 0 0-10.5 1.8A3.2 3.2 0 0 0 7 15Z"/><path d="M8 18l-1 3M12 18l-1 3M16 18l-1 3"/>',
+  snow: '<path d="M7 14h10a4 4 0 0 0 0-8 5.5 5.5 0 0 0-10.5 1.8A3.2 3.2 0 0 0 7 14Z"/><path d="M8 18h.01M12 20h.01M16 18h.01M10 22h.01M14 22h.01"/>',
+  storm: '<path d="M7 14h10a4 4 0 0 0 0-8 5.5 5.5 0 0 0-10.5 1.8A3.2 3.2 0 0 0 7 14Z"/><path d="m12 15-2 4h4l-2 4"/>'
+};
+export function wxIcon(name, size = 22) {
+  return `<svg class="ic" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${WI[name] || WI.cloud}</svg>`;
+}
+
+// Holdfázis (0 = újhold, 0.5 = telihold)
+export function moonPhase(date = new Date()) {
+  const synodic = 29.530588853;
+  const ref = Date.UTC(2000, 0, 6, 18, 14);
+  const days = (date.getTime() - ref) / 864e5;
+  return ((days % synodic) + synodic) % synodic / synodic;
+}
+export function moonName(p) {
+  const n = lang() === 'hu'
+    ? ['Újhold', 'Növekvő sarló', 'Első negyed', 'Növekvő hold', 'Telihold', 'Fogyó hold', 'Utolsó negyed', 'Fogyó sarló']
+    : ['Mlad mesec', 'Rastući srp', 'Prva četvrt', 'Rastući mesec', 'Pun mesec', 'Opadajući mesec', 'Poslednja četvrt', 'Opadajući srp'];
+  return n[Math.round(p * 8) % 8];
+}
+
+// Kapás-esély becslése (egyszerű szabályok, nem tudományos előrejelzés)
+export function biteChance({ trend, wind, temp, code }) {
+  let s = 50;
+  if (trend <= -0.5 && trend >= -3) s += 15;        // lassan csökkenő légnyomás: jó
+  else if (trend < -3) s -= 5;                       // gyors esés (front): bizonytalan
+  else if (trend >= 2) s -= 15;                      // gyorsan emelkedő: gyengébb
+  else if (Math.abs(trend) < 0.5) s += 5;            // stabil
+  if (wind >= 5 && wind <= 20) s += 10; else if (wind > 30) s -= 15;
+  if (temp >= 12 && temp <= 26) s += 10; else if (temp < 4 || temp > 32) s -= 15;
+  if ([95, 96, 99].includes(code)) s -= 25;
+  if ([1, 2, 3, 51, 53, 61].includes(code)) s += 5;  // felhős, enyhe eső: gyakran jó
+  const p = moonPhase(); const nearNewFull = Math.min(Math.abs(p - 0), Math.abs(p - 0.5), Math.abs(p - 1)) < 0.07;
+  if (nearNewFull) s += 5;
+  s = Math.max(5, Math.min(95, s));
+  return { score: s, level: s >= 65 ? 'good' : s >= 45 ? 'mid' : 'low' };
+}
+
+export function trendArrow(tr) {
+  if (tr >= 1) return { a: '↑', k: 'up' };
+  if (tr <= -1) return { a: '↓', k: 'down' };
+  return { a: '→', k: 'flat' };
+}
+export function fmtTime(iso) { return iso ? iso.slice(11, 16) : ''; }
+export function dayName(iso) {
+  return new Date(iso + 'T12:00').toLocaleDateString(lang() === 'hu' ? 'hu-HU' : 'sr-Latn-RS', { weekday: 'short' });
+}
