@@ -12,7 +12,7 @@ export async function render(el, _p, ctx) {
     <div class="card"><div class="menu-list">
       <a href="#/omiljena">${icon('heart')}${esc(t('favs'))}</a>
       <a href="#/dnevnik">${icon('book')}${esc(t('nav_log'))}</a>
-      <a href="#/moja-jezera">${icon('lake')}${esc(t('my_lakes'))}</a>
+      ${p.role === 'owner' || ctx.isAdmin ? `<a href="#/moja-jezera">${icon('lake')}${esc(t('my_lakes'))}</a>` : `<button id="pSuggest">${icon('plus')}${esc(t('suggest_lake'))}</button>`}
       <a href="#/takmicenja">${icon('trophy')}${esc(t('nav_comp'))}</a>
       ${ctx.isAdmin ? `<a href="#/admin">${icon('shield')}${esc(t('nav_admin'))}</a>` : ''}
     </div></div>
@@ -41,5 +41,6 @@ export async function render(el, _p, ctx) {
     if (error || pwErr) { toast(typeof pwErr === 'string' ? pwErr : t('error'), 'err'); return; }
     setLang(l); await reloadSession(); toast(t('saved')); refresh();
   };
+  if ($('#pSuggest')) $('#pSuggest').onclick = () => import('../suggest.js').then(m => m.openSuggest(ctx));
   $('#pOut').onclick = async () => { await sb.auth.signOut(); go('/'); };
 }

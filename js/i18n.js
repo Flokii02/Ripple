@@ -39,6 +39,9 @@ const DICT = {
     review_owner: 'Vlasnik ne može da oceni svoje jezero.', reviews_n: 'ocena', rating: 'Ocena',
     fav: 'Omiljeno', fav_add: 'Dodaj u omiljena', fav_remove: 'Ukloni iz omiljenih', favs: 'Omiljena jezera', favs_empty: 'Još nemate omiljena jezera. Dodajte ih srcem na stranici jezera.',
     wx_today: 'Vreme za pecanje danas', loc_region: 'Vojvodina (centar)', loc_label: 'Lokacija', loc_denied: 'Lokacija nije dostupna. Izaberite mesto ili jezero sa liste.', loc_help_denied: 'Telefon je odbio pristup lokaciji. iPhone: Podešavanja → Privatnost → Lokacijske usluge → (vaš pregledač) → Dok se koristi aplikacija. Android: ikonica katanca pored adrese → Dozvole → Lokacija. Do tada izaberite mesto sa liste.',
+    suggest_lake: 'Predloži jezero', suggest_hint: 'Znate jezero koje još nije na Ripple-u? Pošaljite nam ga, a mi ćemo kontaktirati vlasnika.', suggest_contact: 'Kontakt vlasnika (ako znate)',
+    suggest_send: 'Pošalji predlog', suggest_sent: 'Hvala! Predlog je poslat.', owners_only: 'Jezera mogu da dodaju samo vlasnici jezera. Ako znate jezero koje nedostaje, predložite ga.',
+    owner_cta_angler: 'Znate jezero koje nedostaje? Predložite ga, a vlasnici se mogu registrovati besplatno.', suggestions: 'Predlozi jezera', owner_register: 'Registracija za vlasnike',
     only_favs: 'Omiljena', last_stock: 'Poslednje poribljavanje', next_comp: 'Sledeće takmičenje',
     install: 'Instaliraj aplikaciju', kg: 'kg', cm: 'cm', from: 'od'
   },
@@ -81,6 +84,9 @@ const DICT = {
     review_owner: 'A tulajdonos nem értékelheti a saját tavát.', reviews_n: 'értékelés', rating: 'Értékelés',
     fav: 'Kedvenc', fav_add: 'Kedvencekhez', fav_remove: 'Eltávolítás a kedvencekből', favs: 'Kedvenc tavaim', favs_empty: 'Még nincs kedvenc tavad. A tó oldalán a szívvel adhatod hozzá.',
     wx_today: 'Horgászidő ma', loc_region: 'Vajdaság (közép)', loc_label: 'Helyszín', loc_denied: 'A helyzeted nem érhető el. Válassz települést vagy tavat a listából.', loc_help_denied: 'A telefon nem engedi a helymeghatározást. iPhone: Beállítások → Adatvédelem → Helymeghatározás → (a böngésződ) → Az app használata közben. Android: a cím melletti lakat ikon → Engedélyek → Helyadatok. Addig válassz települést a listából.',
+    suggest_lake: 'Tó javaslása', suggest_hint: 'Ismersz egy tavat, ami még nincs fent a Ripple-ön? Küldd el, és felvesszük a kapcsolatot a tulajdonossal.', suggest_contact: 'A tulajdonos elérhetősége (ha tudod)',
+    suggest_send: 'Javaslat küldése', suggest_sent: 'Köszönjük! A javaslatot elküldtük.', owners_only: 'Tavat csak tótulajdonosok adhatnak hozzá. Ha ismersz egy hiányzó tavat, javasold.',
+    owner_cta_angler: 'Ismersz egy tavat, ami hiányzik? Javasold, a tulajdonosok pedig ingyen regisztrálhatnak.', suggestions: 'Tó-javaslatok', owner_register: 'Regisztráció tulajdonosoknak',
     only_favs: 'Kedvencek', last_stock: 'Utolsó telepítés', next_comp: 'Következő verseny',
     install: 'Alkalmazás telepítése', kg: 'kg', cm: 'cm', from: 'tól'
   }

@@ -3,10 +3,12 @@ import { t, SPECIES, speciesName } from '../i18n.js';
 import { $, $$, esc, icon, toast, slugify, lakePhotoUrl, compressImage, randomName, fmtDate, todayStr } from '../ui.js';
 import { go } from '../app.js';
 import { openCompForm } from './competitions.js';
+import { isOwner, openSuggest, ownersOnlyHTML } from '../suggest.js';
 
 export async function render(el, [idParam], ctx) {
   if (!ctx.user) { go('/prijava'); return; }
   const isNew = idParam === 'novo';
+  if (isNew && !isOwner(ctx)) { el.innerHTML = ownersOnlyHTML(ctx); el.querySelector('#sgOpen').onclick = () => openSuggest(ctx); return; }
   let lake = { species: [] };
   if (!isNew) {
     const { data } = await sb.from('lakes').select('*').eq('id', idParam).maybeSingle();

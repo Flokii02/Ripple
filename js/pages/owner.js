@@ -2,9 +2,11 @@ import { sb } from '../config.js';
 import { t } from '../i18n.js';
 import { esc, icon, lakePhotoUrl } from '../ui.js';
 import { go } from '../app.js';
+import { isOwner, openSuggest, ownersOnlyHTML } from '../suggest.js';
 
 export async function render(el, _p, ctx) {
   if (!ctx.user) { go('/prijava'); return; }
+  if (!isOwner(ctx)) { el.innerHTML = ownersOnlyHTML(ctx); el.querySelector('#sgOpen').onclick = () => openSuggest(ctx); return; }
   const { data } = await sb.from('lakes').select('id, slug, name, place, status, plan, lake_photos(path, sort)').eq('owner_id', ctx.user.id).order('created_at');
   const list = data || [];
   const badge = s => `<span class="chip ${s === 'approved' ? 'ok' : s === 'rejected' ? 'bad' : 'warn'}">${esc(t(s))}</span>`;

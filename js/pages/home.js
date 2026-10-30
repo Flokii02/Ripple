@@ -3,6 +3,7 @@ import { t, SPECIES, speciesName } from '../i18n.js';
 import { $, $$, esc, icon, fmtMoney, lakePhotoUrl, spinner, toast } from '../ui.js';
 import { listWeather, wxInfo, wxIcon, trendArrow, renderWeatherCard } from '../weather.js';
 import { MAP_CENTER as REGION } from '../config.js';
+import { isOwner, openSuggest } from '../suggest.js';
 
 let LAKES = [];
 const F = { q: '', species: '', night: false, acc: false, food: false, boat: false, fav: false, view: 'list' };
@@ -111,7 +112,9 @@ export async function render(el, _p, ctx) {
   };
 
   const renderList = list => {
-    const cta = `<div class="owner-cta"><div><h3>${esc(t('owner_cta_t'))}</h3><p>${esc(t('owner_cta'))}</p></div><a class="btn" href="#/moja-jezera/novo">${icon('plus', 18)}${esc(t('add_lake'))}</a></div>`;
+    const cta = isOwner(ctx)
+      ? `<div class="owner-cta"><div><h3>${esc(t('owner_cta_t'))}</h3><p>${esc(t('owner_cta'))}</p></div><a class="btn" href="#/moja-jezera/novo">${icon('plus', 18)}${esc(t('add_lake'))}</a></div>`
+      : `<div class="owner-cta"><div><h3>${esc(t('owner_cta_t'))}</h3><p>${esc(t('owner_cta_angler'))}</p></div><div class="row"><button class="btn" data-suggest>${icon('plus', 18)}${esc(t('suggest_lake'))}</button>${ctx.user ? '' : `<a class="btn ghost" style="color:#fff;border-color:#4A6574" href="#/prijava">${esc(t('owner_register'))}</a>`}</div></div>`;
     if (!list.length) { $('#list').innerHTML = `<div class="empty">${icon('lake', 40)}<p>${esc(t('no_lakes'))}</p></div>${cta}`; return; }
     $('#list').innerHTML = list.map(l => `
       <a class="lake-card" href="#/jezero/${esc(l.slug)}">
@@ -137,6 +140,7 @@ export async function render(el, _p, ctx) {
     else if (pts.length === 1) map.setView(pts[0], 12);
   };
 
+  $('#list').addEventListener('click', e => { if (e.target.closest('[data-suggest]')) openSuggest(ctx); });
   $('#q').addEventListener('input', e => { F.q = e.target.value; apply(); });
   $('#fSpecies').onchange = e => { F.species = e.target.value; apply(); };
   if ($('#fFav')) $('#fFav').onchange = e => { F.fav = e.target.checked; apply(); };
