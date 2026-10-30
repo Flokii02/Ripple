@@ -1,7 +1,8 @@
 import { sb, MAP_CENTER, MAP_ZOOM } from '../config.js';
 import { t, SPECIES, speciesName } from '../i18n.js';
-import { $, $$, esc, icon, fmtMoney, lakePhotoUrl, spinner } from '../ui.js';
-import { listWeather, wxInfo, wxIcon, trendArrow } from '../weather.js';
+import { $, $$, esc, icon, fmtMoney, lakePhotoUrl, spinner, toast } from '../ui.js';
+import { listWeather, wxInfo, wxIcon, trendArrow, renderWeatherCard } from '../weather.js';
+import { MAP_CENTER as REGION } from '../config.js';
 
 let LAKES = [];
 const F = { q: '', species: '', night: false, acc: false, food: false, boat: false, fav: false, view: 'list' };
@@ -11,6 +12,7 @@ export async function render(el, _p, ctx) {
   el.innerHTML = `
   <div class="page">
     <div class="hero"><h1>${esc(t('nav_lakes'))}</h1><p>${esc(t('tagline'))}</p></div>
+    <div class="card wx-card wx-wide" id="homeWx"></div>
     <div class="filters">
       <label class="search"><span class="sr-only">${esc(t('search_ph'))}</span>
         <input class="input" id="q" type="search" placeholder="${esc(t('search_ph'))}" value="${esc(F.q)}" autocomplete="off"></label>
@@ -38,6 +40,39 @@ export async function render(el, _p, ctx) {
     </div>
   </div>`;
 
+  // Időjárás a főoldalon: mentett hely, saját helyzet vagy egy tó
+  const wxBox = $('#homeWx');
+  const getLoc = () => { try { return JSON.parse(localStorage.getItem('ripple_wx_loc') || 'null'); } catch (e) { return null; } };
+  const setLoc = l => { try { localStorage.setItem('ripple_wx_loc', JSON.stringify(l)); } catch (e) {} };
+  let lakeOpts = [];
+  const drawWx = () => {
+    const loc = getLoc() || { kind: 'region', lat: REGION[0], lng: REGION[1] };
+    const sel = loc.kind === 'lake' ? 'lake:' + loc.id : loc.kind;
+    const head = `<div class="wx-head"><h2>${esc(t('wx_today'))}</h2>
+      <label class="wx-loc"><span class="sr-only">${esc(t('loc_label'))}</span>${icon('pin', 16)}
+        <select id="wxLoc">
+          <option value="region" ${sel === 'region' ? 'selected' : ''}>${esc(t('loc_region'))}</option>
+          <option value="mine" ${sel === 'mine' ? 'selected' : ''}>${esc(t('my_location'))}</option>
+          ${lakeOpts.map(l => `<option value="lake:${l.id}" ${sel === 'lake:' + l.id ? 'selected' : ''}>${esc(l.name)}</option>`).join('')}
+        </select></label></div>`;
+    wxBox.innerHTML = head + spinner();
+    renderWeatherCard(wxBox, loc.lat, loc.lng, { head }).then(() => bindLoc());
+    bindLoc();
+  };
+  const bindLoc = () => {
+    const s = $('#wxLoc'); if (!s) return;
+    s.onchange = () => {
+      const v = s.value;
+      if (v === 'region') { setLoc({ kind: 'region', lat: REGION[0], lng: REGION[1] }); drawWx(); }
+      else if (v === 'mine') {
+        if (!navigator.geolocation) { toast(t('loc_denied'), 'err'); return; }
+        navigator.geolocation.getCurrentPosition(p => { setLoc({ kind: 'mine', lat: +p.coords.latitude.toFixed(3), lng: +p.coords.longitude.toFixed(3) }); drawWx(); },
+          () => { toast(t('loc_denied'), 'err'); drawWx(); }, { timeout: 10000, maximumAge: 600000 });
+      } else { const l = lakeOpts.find(x => 'lake:' + x.id === v); if (l) { setLoc({ kind: 'lake', id: l.id, lat: l.lat, lng: l.lng }); drawWx(); } }
+    };
+  };
+  drawWx();
+
   const map = L.map('map', { scrollWheelZoom: true }).setView(MAP_CENTER, MAP_ZOOM);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; OpenStreetMap' }).addTo(map);
   const layer = L.layerGroup().addTo(map);
@@ -47,6 +82,8 @@ export async function render(el, _p, ctx) {
     .eq('status', 'approved').order('name');
   if (error) { $('#list').innerHTML = `<div class="empty">${esc(t('error'))}</div>`; return; }
   LAKES = (data || []).map(l => ({ ...l, photo: (l.lake_photos || []).sort((a, b) => a.sort - b.sort)[0]?.path || null }));
+  lakeOpts = LAKES.filter(l => l.lat && l.lng);
+  if (lakeOpts.length) { const s = $('#wxLoc'); if (s && !s.querySelector('option[value^="lake:"]')) drawWx(); }
   let FAVS = new Set();
   if (ctx.user) { const { data: fv } = await sb.from('favorites').select('lake_id').eq('user_id', ctx.user.id); FAVS = new Set((fv || []).map(f => f.lake_id)); }
 

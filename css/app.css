@@ -318,3 +318,20 @@ input[type=search] { -webkit-appearance: none; appearance: none; }
 .wx-day span { color: var(--mute); }
 .wx-day em { font-style: normal; font-size: 11.5px; color: #2F6FB5; }
 .lake-card .wx-mini { display: inline-flex; align-items: center; gap: 4px; color: var(--lake-d); font-weight: 600; }
+
+/* Főoldali időjárás */
+.wx-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.wx-head h2 { margin: 0 !important; }
+.wx-loc { display: inline-flex; align-items: center; gap: 6px; color: var(--lake-d); min-width: 0; max-width: 100%; }
+.wx-loc select { min-height: 40px; max-width: 220px; border-radius: 999px; border: 1px solid var(--line); background: #fff; padding: 6px 30px 6px 12px; font-weight: 600; font-size: 14px; color: var(--ink); -webkit-appearance: none; appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--mute) 50%), linear-gradient(135deg, var(--mute) 50%, transparent 50%); background-position: calc(100% - 15px) 50%, calc(100% - 10px) 50%; background-size: 5px 5px; background-repeat: no-repeat; text-overflow: ellipsis; }
+.wx-wide { margin-bottom: 18px; }
+@media (min-width: 960px) {
+  .wx-wide { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.3fr); grid-template-areas: "head head head" "now grid days" "bite grid days" "src src src"; gap: 0 18px; align-items: start; }
+  .wx-wide > .wx-head { grid-area: head; }
+  .wx-wide > .wx-now { grid-area: now; }
+  .wx-wide > .bite { grid-area: bite; margin-bottom: 0; }
+  .wx-wide > .wx-grid { grid-area: grid; }
+  .wx-wide > .wx-days { grid-area: days; margin-top: 0; }
+  .wx-wide > .small { grid-area: src; }
+  .wx-wide > .spinner, .wx-wide > p { grid-column: 1 / -1; }
+}

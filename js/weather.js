@@ -1,5 +1,6 @@
 // Időjárás az Open-Meteo ingyenes szolgáltatásából (kulcs nélkül), 30 perces gyorsítótárral
-import { lang } from './i18n.js';
+import { lang, t } from './i18n.js';
+import { esc, icon } from './ui.js';
 
 const API = 'https://api.open-meteo.com/v1/forecast';
 const TTL = 30 * 60 * 1000;
@@ -123,4 +124,38 @@ export function trendArrow(tr) {
 export function fmtTime(iso) { return iso ? iso.slice(11, 16) : ''; }
 export function dayName(iso) {
   return new Date(iso + 'T12:00').toLocaleDateString(lang() === 'hu' ? 'hu-HU' : 'sr-Latn-RS', { weekday: 'short' });
+}
+
+// Teljes időjárás-kártya (tó oldal és főoldal)
+export async function renderWeatherCard(box, lat, lng, opts = {}) {
+  try {
+    const w = await lakeWeather(lat, lng);
+    const n = w.now, info = wxInfo(n.weather_code), tr = trendArrow(w.trend);
+    const mp = moonPhase(), bite = biteChance({ trend: w.trend, wind: n.wind_speed_10m, temp: n.temperature_2m, code: n.weather_code });
+    const today = w.daily[0] || {};
+    const r1 = v => Math.round(v);
+    box.innerHTML = `
+      ${opts.head ?? `<h2>${esc(t('wx_title'))}</h2>`}
+      <div class="wx-now">
+        <div class="wx-ic">${wxIcon(info.icon, 44)}</div>
+        <div><div class="wx-temp">${r1(n.temperature_2m)}°</div><div class="small muted">${esc(info.text)} · ${esc(t('wx_feels'))} ${r1(n.apparent_temperature)}°</div></div>
+      </div>
+      <div class="bite bite-${bite.level}">
+        <div class="row" style="justify-content:space-between"><b>${esc(t('bite'))}</b><span class="bite-lvl">${esc(t('bite_' + bite.level))}</span></div>
+        <div class="bite-bar"><span style="width:${bite.score}%"></span></div>
+        <div class="small" style="opacity:.8">${esc(t('bite_note'))}</div>
+      </div>
+      <div class="wx-grid">
+        <div>${icon('wind', 18)}<small>${esc(t('wx_wind'))}</small><b>${r1(n.wind_speed_10m)} km/h</b></div>
+        <div>${icon('gauge', 18)}<small>${esc(t('wx_pressure'))}</small><b>${r1(n.surface_pressure)} hPa <span class="tr tr-${tr.k}" title="${esc(t('p_' + tr.k))}">${tr.a}</span></b><span class="small muted">${esc(t('p_' + tr.k))}${w.trend ? ` (${w.trend > 0 ? '+' : ''}${String(w.trend).replace('.', ',')}/3h)` : ''}</span></div>
+        <div>${icon('moonph', 18)}<small>${esc(t('wx_moon'))}</small><b>${esc(moonName(mp))}</b></div>
+        <div>${icon('sunrise', 18)}<small>${esc(t('wx_sunrise'))} / ${esc(t('wx_sunset'))}</small><b>${fmtTime(today.sunrise)} – ${fmtTime(today.sunset)}</b></div>
+      </div>
+      <div class="wx-days">${w.daily.slice(0, 5).map(d => { const i = wxInfo(d.code); return `
+        <div class="wx-day"><small>${esc(dayName(d.day))}</small>${wxIcon(i.icon, 24)}<b>${r1(d.max)}°</b><span>${r1(d.min)}°</span>${d.rain ? `<em>${d.rain}%</em>` : '<em>&nbsp;</em>'}</div>`; }).join('')}</div>
+      <div class="small muted" style="margin-top:8px">Open-Meteo</div>`;
+  } catch (e) {
+    console.error(e);
+    box.innerHTML = `${opts.head ?? `<h2>${esc(t('wx_title'))}</h2>`}<p class="muted small">${esc(t('wx_err'))}</p>`;
+  }
 }
