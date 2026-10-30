@@ -74,7 +74,7 @@ export async function render(el, _p, ctx) {
           ${lakeOpts.length ? `<optgroup label="${esc(t('nav_lakes'))}">${lakeOpts.map(l => `<option value="lake:${l.id}" ${sel === 'lake:' + l.id ? 'selected' : ''}>${esc(l.name)}</option>`).join('')}</optgroup>` : ''}
         </select></label></div>`;
     wxBox.innerHTML = head + spinner();
-    renderWeatherCard(wxBox, loc.lat, loc.lng, { head }).then(() => bindLoc());
+    renderWeatherCard(wxBox, loc.lat, loc.lng, { head, collapsible: window.innerWidth < 860 }).then(() => bindLoc());
     bindLoc();
   };
   const bindLoc = () => {

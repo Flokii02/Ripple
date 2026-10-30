@@ -1,6 +1,8 @@
 import { sb } from '../config.js';
 import { t, SPECIES, speciesName } from '../i18n.js';
 import { $, $$, esc, icon, fmtDate, openModal, closeModal, toast, catchPhotoUrls, compressImage, randomName } from '../ui.js';
+import { weatherAt, wxInfo, wxIcon, trendArrow, moonName } from '../weather.js';
+import { MAP_CENTER } from '../config.js';
 
 export async function render(el, _p, ctx) {
   if (!ctx.user) {
@@ -11,6 +13,7 @@ export async function render(el, _p, ctx) {
   <div class="page">
     <div class="page-head"><h1>${esc(t('log_title'))}</h1><button class="btn lake" id="addCatch">${icon('plus', 18)}${esc(t('log_add'))}</button></div>
     <div class="stats" id="stats"></div>
+    <div id="insights"></div>
     <div id="list"></div>
   </div>`;
 
@@ -28,6 +31,7 @@ export async function render(el, _p, ctx) {
     <div class="stat"><small>${esc(t('st_biggest'))}</small><b>${biggest ? esc(Number(biggest.weight_kg).toLocaleString('sr-RS')) + ' ' + esc(t('kg')) : '—'}</b>${biggest ? `<div class="small muted">${esc(speciesName(biggest.species))}</div>` : ''}</div>
     <div class="stat"><small>${esc(t('st_top'))}</small><b>${top ? esc(speciesName(top[0])) : '—'}</b>${top ? `<div class="small muted">${top[1]}×</div>` : ''}</div>
     <div class="stat"><small>${esc(t('st_waters'))}</small><b>${waters.size}</b></div>`;
+  $('#insights').innerHTML = insightsHTML(list);
 
   $('#list').innerHTML = list.length ? `<div class="catch-grid">${list.map(c => `
     <div class="catch-card">
@@ -36,6 +40,7 @@ export async function render(el, _p, ctx) {
         <h3><span>${esc(speciesName(c.species))}</span>${c.weight_kg ? `<span class="w">${esc(Number(c.weight_kg).toLocaleString('sr-RS'))} ${esc(t('kg'))}</span>` : ''}</h3>
         <div class="small muted">${esc(fmtDate(c.caught_at))} · ${c.lakes ? `<a href="#/jezero/${esc(c.lakes.slug)}">${esc(c.lakes.name)}</a>` : esc(c.water_name || '')}</div>
         <div class="small muted">${[c.length_cm ? Number(c.length_cm).toLocaleString('sr-RS') + ' ' + t('cm') : '', c.bait, c.method].filter(Boolean).map(esc).join(' · ')}</div>
+        ${c.wx_pressure != null ? `<div class="catch-wx"><span>${wxIcon(wxInfo(c.wx_code).icon, 15)}${Math.round(c.wx_temp)}°</span><span>${Math.round(c.wx_pressure)} hPa <b class="tr tr-${trendArrow(c.wx_trend || 0).k}">${trendArrow(c.wx_trend || 0).a}</b></span>${c.moon != null ? `<span>${icon('moonph', 13)}${esc(moonName(Number(c.moon)))}</span>` : ''}</div>` : ''}
         <div class="chips" style="margin-top:4px">${c.is_public ? `<span class="chip">${esc(t('public_catch').split(' (')[0])}</span>` : ''}${c.released ? `<span class="chip ok">${esc(t('released'))}</span>` : ''}</div>
       </div>
       <div class="actions">
@@ -65,7 +70,7 @@ function localInput(d) {
 }
 
 async function openCatchForm(ctx, c, done) {
-  const { data: lakes } = await sb.from('lakes').select('id, name, place').eq('status', 'approved').order('name');
+  const { data: lakes } = await sb.from('lakes').select('id, name, place, lat, lng').eq('status', 'approved').order('name');
   const body = openModal(c ? t('edit') : t('log_add'), `
     <label class="field"><span>${esc(t('species'))}</span><select id="kSpecies">
       ${SPECIES.map(s => `<option value="${s.key}" ${c?.species === s.key ? 'selected' : ''}>${esc(speciesName(s.key))}</option>`).join('')}</select></label>
@@ -112,6 +117,16 @@ async function openCatchForm(ctx, c, done) {
         oldPath = c?.photo_path || null;
         row.photo_path = path;
       }
+      // Időjárás a fogás pillanatában (tó helye, különben a főoldalon választott hely)
+      const changed = !c || c.wx_pressure == null || c.caught_at !== row.caught_at || c.lake_id !== row.lake_id;
+      if (changed) {
+        const lk = (lakes || []).find(l => l.id === row.lake_id && l.lat && l.lng);
+        let pt = lk ? [lk.lat, lk.lng] : null;
+        if (!pt) { try { const sv = JSON.parse(localStorage.getItem('ripple_wx_loc') || 'null'); if (sv?.lat) pt = [sv.lat, sv.lng]; } catch (e) {} }
+        if (!pt && row.water_name) pt = MAP_CENTER;
+        const wx = pt ? await weatherAt(pt[0], pt[1], row.caught_at) : null;
+        if (wx) Object.assign(row, wx);
+      }
       const res = c ? await sb.from('catches').update(row).eq('id', c.id) : await sb.from('catches').insert({ ...row, user_id: ctx.user.id });
       if (res.error) throw res.error;
       if (oldPath) await sb.storage.from('catch-photos').remove([oldPath]);
@@ -120,4 +135,27 @@ async function openCatchForm(ctx, c, done) {
       console.error(e); $('#kErr', body).textContent = t('error'); btn.disabled = false;
     }
   };
+}
+
+// "Mikor kap a legjobban": a fogások időjárásából
+function insightsHTML(list) {
+  const w = list.filter(c => c.wx_pressure != null);
+  if (w.length < 3) return list.length ? `<div class="notice info" style="margin-bottom:18px">${esc(t('ins_need'))}</div>` : '';
+  const group = (fn, keys) => { const m = Object.fromEntries(keys.map(k => [k, 0])); w.forEach(c => { const k = fn(c); if (k in m) m[k]++; }); return m; };
+  const pr = group(c => trendArrow(c.wx_trend || 0).k, ['down', 'flat', 'up']);
+  const tp = group(c => { const x = Number(c.wx_temp); return x < 10 ? '<10°' : x < 15 ? '10–15°' : x < 20 ? '15–20°' : x < 25 ? '20–25°' : '25°+'; }, ['<10°', '10–15°', '15–20°', '20–25°', '25°+']);
+  const hourOf = c => Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Belgrade', hour: '2-digit', hour12: false }).format(new Date(c.caught_at)));
+  const td = group(c => { const h = hourOf(c); return h >= 4 && h < 10 ? 'morning' : h < 16 && h >= 10 ? 'day' : h >= 16 && h < 21 ? 'evening' : 'night'; }, ['morning', 'day', 'evening', 'night']);
+  const mn = group(c => c.moon == null ? '' : String(Math.round(Number(c.moon) * 4) % 4), ['0', '1', '2', '3']);
+  const box = (title, m, label) => {
+    const max = Math.max(1, ...Object.values(m)); const best = Object.entries(m).sort((a, b) => b[1] - a[1])[0];
+    return `<div class="ins"><h3>${esc(title)}</h3>${Object.entries(m).map(([k, v]) => `<div class="bar"><span>${esc(label(k))}</span><i class="${k === best[0] && v ? 'top' : ''}" style="width:${Math.round(v / max * 100)}%"></i><span>${v}</span></div>`).join('')}
+      ${best[1] ? `<div class="best">${esc(t('ins_best'))}: <b>${esc(label(best[0]))}</b></div>` : ''}</div>`;
+  };
+  return `<div class="section" style="margin-top:0"><h2>${esc(t('ins_title'))}</h2><div class="ins-grid">
+    ${box(t('ins_pressure'), pr, k => t('p_' + k))}
+    ${box(t('ins_temp'), tp, k => k)}
+    ${box(t('ins_time'), td, k => t('tod_' + k))}
+    ${box(t('ins_moon'), mn, k => moonName(Number(k) / 4))}
+  </div></div>`;
 }

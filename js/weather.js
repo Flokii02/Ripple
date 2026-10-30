@@ -134,8 +134,18 @@ export async function renderWeatherCard(box, lat, lng, opts = {}) {
     const mp = moonPhase(), bite = biteChance({ trend: w.trend, wind: n.wind_speed_10m, temp: n.temperature_2m, code: n.weather_code });
     const today = w.daily[0] || {};
     const r1 = v => Math.round(v);
+    let open = true;
+    if (opts.collapsible) { try { open = localStorage.getItem('ripple_wx_open') === '1'; } catch (e) { open = false; } }
+    box.classList.toggle('wx-collapsed', !!opts.collapsible && !open);
+    box.classList.toggle('wx-collapsible', !!opts.collapsible);
     box.innerHTML = `
       ${opts.head ?? `<h2>${esc(t('wx_title'))}</h2>`}
+      ${opts.collapsible ? `<button class="wx-sum" aria-expanded="${open}">
+        <span class="wx-sum-ic">${wxIcon(info.icon, 28)}</span><b class="wx-sum-t">${r1(n.temperature_2m)}°</b>
+        <span class="chip bite-chip bite-${bite.level}">${esc(t('bite_' + bite.level))}</span>
+        <span class="wx-sum-p">${r1(n.surface_pressure)} hPa <span class="tr tr-${tr.k}">${tr.a}</span></span>
+        <span class="wx-sum-more">${esc(open ? t('less') : t('more'))}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>
+      </button>` : ''}
       <div class="wx-now">
         <div class="wx-ic">${wxIcon(info.icon, 44)}</div>
         <div><div class="wx-temp">${r1(n.temperature_2m)}°</div><div class="small muted">${esc(info.text)} · ${esc(t('wx_feels'))} ${r1(n.apparent_temperature)}°</div></div>
@@ -157,5 +167,42 @@ export async function renderWeatherCard(box, lat, lng, opts = {}) {
   } catch (e) {
     console.error(e);
     box.innerHTML = `${opts.head ?? `<h2>${esc(t('wx_title'))}</h2>`}<p class="muted small">${esc(t('wx_err'))}</p>`;
+    return;
   }
+  const sum = box.querySelector('.wx-sum');
+  if (sum) sum.onclick = () => {
+    const nowOpen = box.classList.contains('wx-collapsed');
+    box.classList.toggle('wx-collapsed', !nowOpen);
+    sum.setAttribute('aria-expanded', nowOpen);
+    sum.querySelector('.wx-sum-more').firstChild.textContent = nowOpen ? t('less') : t('more');
+    try { localStorage.setItem('ripple_wx_open', nowOpen ? '1' : '0'); } catch (e) {}
+  };
+}
+
+// Időjárás egy adott időpontban (fogáshoz): utolsó 3 óra légnyomás-változással
+function belgradeHour(d) {
+  const p = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Belgrade', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', hour12: false }).format(d);
+  return p.replace(' ', 'T').slice(0, 13) + ':00';
+}
+export async function weatherAt(lat, lng, iso) {
+  const at = new Date(iso);
+  if (isNaN(at) || at > new Date(Date.now() + 3600e3)) return null;
+  const end = belgradeHour(at), start = belgradeHour(new Date(at.getTime() - 3 * 3600e3));
+  const vars = 'temperature_2m,surface_pressure,wind_speed_10m,weather_code';
+  const ageDays = (Date.now() - at.getTime()) / 864e5;
+  const u = ageDays < 85
+    ? `${API}?latitude=${lat}&longitude=${lng}&timezone=Europe%2FBelgrade&past_days=92&forecast_days=1&hourly=${vars}&start_hour=${start}&end_hour=${end}`
+    : `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lng}&timezone=Europe%2FBelgrade&start_date=${start.slice(0, 10)}&end_date=${end.slice(0, 10)}&hourly=${vars}`;
+  const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 7000);
+  try {
+    const r = await fetch(u, { signal: ctl.signal });
+    if (!r.ok) return null;
+    const d = await r.json(); const h = d.hourly; if (!h?.time?.length) return null;
+    let i = h.time.indexOf(end); if (i < 0) i = h.time.length - 1;
+    const j = h.time.indexOf(start);
+    const p = h.surface_pressure[i], p0 = j >= 0 ? h.surface_pressure[j] : null;
+    if (p == null) return null;
+    return { wx_temp: h.temperature_2m[i], wx_pressure: Math.round(p * 10) / 10, wx_trend: p0 == null ? null : Math.round((p - p0) * 10) / 10,
+      wx_wind: h.wind_speed_10m[i], wx_code: h.weather_code[i], moon: Math.round(moonPhase(at) * 1000) / 1000 };
+  } catch (e) { return null; } finally { clearTimeout(to); }
 }

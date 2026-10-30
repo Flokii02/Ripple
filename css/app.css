@@ -428,3 +428,32 @@ body { background: var(--bg) linear-gradient(180deg, #E7EFF1 0, var(--bg) 340px)
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   .splash-waves, .lh-waves, .lh-fish { animation: none !important; }
 }
+
+/* Összecsukható időjárás (telefon) */
+.wx-sum { display: none; }
+@media (max-width: 859px) {
+  .wx-sum { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 52px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--bg); cursor: pointer; text-align: left; color: var(--ink); margin-bottom: 12px; }
+  .wx-sum-ic { color: var(--lake-d); display: inline-flex; }
+  .wx-sum-t { font: 700 22px var(--display); }
+  .wx-sum-p { font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+  .wx-sum-more { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; color: var(--lake-d); }
+  .wx-sum[aria-expanded=true] .wx-sum-more svg { transform: rotate(180deg); }
+  .wx-collapsed .wx-sum { margin-bottom: 0; }
+  .wx-collapsed > .wx-now, .wx-collapsed > .bite, .wx-collapsed > .wx-grid, .wx-collapsed > .wx-days, .wx-collapsed > .small.muted { display: none; }
+  .wx-collapsible:not(.wx-collapsed) > .wx-now { display: none; }
+}
+.bite-chip { font-size: 12px; padding: 3px 9px; }
+.bite-chip.bite-good { background: var(--ok-l); color: var(--ok); } .bite-chip.bite-mid { background: var(--sand-l); color: #7A5410; } .bite-chip.bite-low { background: #fff; color: var(--ink-2); border: 1px solid var(--line); }
+
+/* Fogás időjárása és szokások */
+.catch-wx { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; font-size: 12.5px; color: var(--lake-d); margin-top: 4px; }
+.catch-wx span { display: inline-flex; align-items: center; gap: 3px; }
+.ins-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 18px; }
+@media (min-width: 760px) { .ins-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.ins { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; }
+.ins h3 { font-size: 14px; color: var(--ink-2); margin-bottom: 8px; }
+.ins .bar { display: grid; grid-template-columns: 74px minmax(0, 1fr) 22px; gap: 6px; align-items: center; font-size: 12.5px; margin-top: 4px; }
+.ins .bar i { display: block; height: 8px; border-radius: 999px; background: var(--lake); transform-origin: left; animation: grow .8s ease both; }
+.ins .bar i.top { background: var(--sand); }
+.ins .bar span:last-child { text-align: right; color: var(--mute); }
+.ins .best { font-size: 12.5px; margin-top: 8px; color: var(--ink); }

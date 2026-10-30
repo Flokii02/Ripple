@@ -49,6 +49,9 @@ const DICT = {
     stats_empty: 'Statistika se prikazuje kada jezero bude odobreno i posećeno.',
     about: 'O nama', privacy: 'Privatnost', terms: 'Uslovi korišćenja', contact_us: 'Kontaktirajte nas', message: 'Poruka', send: 'Pošalji', sent_ok: 'Poruka je poslata. Hvala!',
     accept_terms: 'Prihvatam uslove korišćenja i politiku privatnosti', must_accept: 'Potrebno je da prihvatite uslove.', messages: 'Poruke',
+    more: 'Detalji', less: 'Manje', ins_title: 'Kada ti najbolje grize', ins_need: 'Kada zabeležiš bar 3 ulova sa jezera ili mesta, ovde ćeš videti u kakvom vremenu najviše loviš.',
+    ins_pressure: 'Pritisak', ins_temp: 'Temperatura', ins_time: 'Doba dana', ins_moon: 'Mesec', ins_best: 'Najčešće',
+    tod_morning: 'Jutro', tod_day: 'Dan', tod_evening: 'Veče', tod_night: 'Noć', wx_saved: 'Vreme u trenutku ulova je sačuvano.',
     only_favs: 'Omiljena', last_stock: 'Poslednje poribljavanje', next_comp: 'Sledeće takmičenje',
     install: 'Instaliraj aplikaciju', kg: 'kg', cm: 'cm', from: 'od'
   },
@@ -101,6 +104,9 @@ const DICT = {
     stats_empty: 'A statisztika akkor jelenik meg, ha a tavat jóváhagyták és meglátogatták.',
     about: 'Rólunk', privacy: 'Adatvédelem', terms: 'Felhasználási feltételek', contact_us: 'Írj nekünk', message: 'Üzenet', send: 'Küldés', sent_ok: 'Az üzenetet elküldtük. Köszönjük!',
     accept_terms: 'Elfogadom a felhasználási feltételeket és az adatvédelmi tájékoztatót', must_accept: 'El kell fogadnod a feltételeket.', messages: 'Üzenetek',
+    more: 'Részletek', less: 'Kevesebb', ins_title: 'Mikor kap nálad a legjobban', ins_need: 'Ha legalább 3 fogást rögzítesz tóról vagy helyről, itt látod majd, milyen időben fogsz a legtöbbet.',
+    ins_pressure: 'Légnyomás', ins_temp: 'Hőmérséklet', ins_time: 'Napszak', ins_moon: 'Hold', ins_best: 'Leggyakrabban',
+    tod_morning: 'Reggel', tod_day: 'Napközben', tod_evening: 'Este', tod_night: 'Éjjel', wx_saved: 'A fogás pillanatának időjárását elmentettük.',
     only_favs: 'Kedvencek', last_stock: 'Utolsó telepítés', next_comp: 'Következő verseny',
     install: 'Alkalmazás telepítése', kg: 'kg', cm: 'cm', from: 'tól'
   }
