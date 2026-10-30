@@ -1,0 +1,15 @@
+{
+  "name": "Ripple – jezera i ulov",
+  "short_name": "Ripple",
+  "description": "Sva jezera, takmičenja i tvoj ulov na jednom mestu.",
+  "start_url": "./#/",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F3F6F7",
+  "theme_color": "#0E2A3B",
+  "icons": [
+    { "src": "assets/brand/ripple-icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/brand/ripple-icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/brand/ripple-icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

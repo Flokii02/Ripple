@@ -1,0 +1,112 @@
+import { sb } from './config.js';
+import { t, lang, setLang } from './i18n.js';
+import { $, esc, icon, logoMark, closeModal, spinner } from './ui.js';
+
+// Közös állapot: ki van belépve
+export const ctx = { user: null, profile: null, isAdmin: false };
+
+async function loadSession() {
+  const { data } = await sb.auth.getSession();
+  ctx.user = data.session?.user || null;
+  ctx.profile = null; ctx.isAdmin = false;
+  if (ctx.user) {
+    const [{ data: p }, { data: adm }] = await Promise.all([
+      sb.from('profiles').select('*').eq('id', ctx.user.id).maybeSingle(),
+      sb.rpc('am_i_admin')
+    ]);
+    ctx.profile = p;
+    ctx.isAdmin = adm === true;
+    if (p?.lang && p.lang !== lang()) setLang(p.lang);
+  }
+}
+
+// Útvonalak: #/..., a minták sorrendben
+const ROUTES = [
+  [/^\/?$/, 'home'],
+  [/^\/jezero\/([a-z0-9-]+)$/, 'lake'],
+  [/^\/takmicenja$/, 'competitions'],
+  [/^\/dnevnik$/, 'log'],
+  [/^\/moja-jezera$/, 'owner'],
+  [/^\/moja-jezera\/(novo|\d+)$/, 'lakeEdit'],
+  [/^\/admin$/, 'admin'],
+  [/^\/prijava$/, 'auth'],
+  [/^\/profil$/, 'profile']
+];
+const PAGES = {
+  home: () => import('./pages/home.js'),
+  lake: () => import('./pages/lake.js'),
+  competitions: () => import('./pages/competitions.js'),
+  log: () => import('./pages/log.js'),
+  owner: () => import('./pages/owner.js'),
+  lakeEdit: () => import('./pages/lakeEdit.js'),
+  admin: () => import('./pages/admin.js'),
+  auth: () => import('./pages/auth.js'),
+  profile: () => import('./pages/profile.js')
+};
+
+export function go(path) { location.hash = '#' + path; }
+
+let renderSeq = 0;
+async function route() {
+  closeModal();
+  // Supabase visszairányítás (email megerősítés, jelszó-visszaállítás): a token a hash-ben jön
+  if (/access_token=|error_description=/.test(location.hash)) { $('#main').innerHTML = `<div class="page">${spinner()}</div>`; setTimeout(() => { if (/access_token=|error_description=/.test(location.hash)) go('/'); }, 2500); return; }
+  const path = decodeURIComponent(location.hash.replace(/^#/, '')) || '/';
+  let name = null, params = [];
+  for (const [re, n] of ROUTES) { const m = path.match(re); if (m) { name = n; params = m.slice(1); break; } }
+  renderNav(name);
+  const main = $('#main');
+  const seq = ++renderSeq;
+  if (!name) { main.innerHTML = `<div class="page narrow"><div class="empty">${esc(t('not_found'))}</div></div>`; return; }
+  main.innerHTML = `<div class="page">${spinner()}</div>`;
+  try {
+    const mod = await PAGES[name]();
+    if (seq !== renderSeq) return;
+    main.innerHTML = '';
+    document.body.dataset.page = name;
+    await mod.render(main, params, ctx);
+    window.scrollTo(0, 0);
+  } catch (e) {
+    console.error(e);
+    if (seq === renderSeq) main.innerHTML = `<div class="page narrow"><div class="empty">${esc(t('error'))}</div></div>`;
+  }
+}
+
+function renderNav(active) {
+  const tabs = [
+    ['home', '/', 'map', t('nav_lakes')],
+    ['competitions', '/takmicenja', 'trophy', t('nav_comp')],
+    ['log', '/dnevnik', 'book', t('nav_log')],
+    ctx.user ? ['profile', '/profil', 'user', t('nav_profile')] : ['auth', '/prijava', 'user', t('nav_login')]
+  ];
+  const isActive = n => n === active || (n === 'home' && active === 'lake') || (n === 'profile' && ['owner', 'lakeEdit', 'admin'].includes(active));
+  $('#topNav').innerHTML = tabs.map(([n, p, ic, label]) =>
+    `<a href="#${p}" class="tn ${isActive(n) ? 'on' : ''}" ${isActive(n) ? 'aria-current="page"' : ''}>${esc(label)}</a>`).join('')
+    + `<button class="lang-btn" id="langBtn" aria-label="${esc(t('language'))}">${lang() === 'hu' ? 'SR' : 'HU'}</button>`;
+  $('#tabBar').innerHTML = tabs.map(([n, p, ic, label]) =>
+    `<a href="#${p}" class="tb ${isActive(n) ? 'on' : ''}" ${isActive(n) ? 'aria-current="page"' : ''}>${icon(ic, 22)}<span>${esc(label)}</span></a>`).join('');
+  $('#langBtn').onclick = async () => {
+    setLang(lang() === 'hu' ? 'sr' : 'hu');
+    if (ctx.user) sb.from('profiles').update({ lang: lang() }).eq('id', ctx.user.id);
+    route();
+  };
+}
+
+export function refresh() { return route(); }
+
+async function init() {
+  $('#brand').innerHTML = `${logoMark(30)}<span>Ripple</span>`;
+  $('#modalClose').onclick = closeModal;
+  $('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+  await loadSession();
+  sb.auth.onAuthStateChange(async (ev) => {
+    if (ev === 'SIGNED_IN' || ev === 'SIGNED_OUT' || ev === 'USER_UPDATED') { await loadSession(); route(); }
+    if (ev === 'PASSWORD_RECOVERY') go('/profil');
+  });
+  window.addEventListener('hashchange', route);
+  route();
+  if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+export async function reloadSession() { await loadSession(); }
+init();
