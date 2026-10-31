@@ -2,6 +2,7 @@ import { sb } from '../config.js';
 import { t, lang, setLang } from '../i18n.js';
 import { $, esc, icon, toast } from '../ui.js';
 import { go, reloadSession, refresh } from '../app.js';
+import { canInstall, bindInstall } from '../install.js';
 
 export async function render(el, _p, ctx) {
   if (!ctx.user) { go('/prijava'); return; }
@@ -18,6 +19,7 @@ export async function render(el, _p, ctx) {
       <a href="#/lovostaj">${icon('shield')}${esc(t('seasons'))}</a>
       ${ctx.isAdmin ? `<a href="#/admin">${icon('shield')}${esc(t('nav_admin'))}</a>` : ''}
       <a href="#/o-nama">${icon('mail')}${esc(t('about'))}</a>
+      ${canInstall() ? `<button data-inst class="inst-btn">${icon('download')}${esc(t('install'))}</button>` : ''}
     </div></div>
     <div class="card">
       <label class="field"><span>${esc(t('name'))}</span><input id="pName" maxlength="80" value="${esc(p.display_name || '')}"></label>
@@ -33,6 +35,7 @@ export async function render(el, _p, ctx) {
     </div>
     <div style="margin-top:16px"><button class="btn danger block" id="pOut">${esc(t('logout'))}</button></div>
   </div>`;
+  bindInstall(el);
   $('#pSave').onclick = async () => {
     const l = el.querySelector('input[name=lang]:checked').value;
     const upd = { display_name: $('#pName').value.trim().slice(0, 80), lang: l };

@@ -1,5 +1,6 @@
 import { sb, MAP_CENTER, MAP_ZOOM } from '../config.js';
 import { t, SPECIES, speciesName } from '../i18n.js';
+import { installBanner, bindInstall } from '../install.js';
 import { $, $$, esc, icon, fmtMoney, lakePhotoUrl, spinner, toast } from '../ui.js';
 import { listWeather, wxInfo, wxIcon, trendArrow, renderWeatherCard } from '../weather.js';
 import { MAP_CENTER as REGION } from '../config.js';
@@ -30,6 +31,7 @@ export async function render(el, _p, ctx) {
         <path class="w2" d="M0 60 C 240 20 480 100 720 60 S 1200 20 1440 60 V90 H0Z"/>
       </svg>
     </section>
+    <div id="instSlot">${installBanner()}</div>
     <div class="card wx-card wx-wide" id="homeWx"></div>
     ${seasonCard()}
     <div class="filters">
@@ -59,6 +61,8 @@ export async function render(el, _p, ctx) {
     </div>
   </div>`;
 
+  bindInstall(el);
+  document.addEventListener('ripple-installable', () => { const s = $('#instSlot'); if (s && !s.innerHTML) { s.innerHTML = installBanner(); bindInstall(s); } }, { once: true });
   // Időjárás a főoldalon: mentett hely, saját helyzet vagy egy tó
   const wxBox = $('#homeWx');
   const getLoc = () => { try { return JSON.parse(localStorage.getItem('ripple_wx_loc') || 'null'); } catch (e) { return null; } };

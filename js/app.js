@@ -1,6 +1,7 @@
 import { sb } from './config.js';
 import { t, lang, setLang } from './i18n.js';
 import { $, esc, icon, logoMark, closeModal, spinner, toast } from './ui.js';
+import './install.js';
 
 // Közös állapot: ki van belépve
 export const ctx = { user: null, profile: null, isAdmin: false };
