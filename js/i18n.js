@@ -58,6 +58,10 @@ const DICT = {
     ss_note: 'Informativni podaci. Važeći propisi i uslovi vaše dozvole su obavezujući. Na privatnim jezerima sa ribom iz uzgoja mogu važiti posebna pravila jezera, proverite ih kod vlasnika.',
     ss_source: 'Izvor: Naredba o merama za očuvanje i zaštitu ribljeg fonda, Sl. glasnik RS 104/2009; kečiga: zabrana od 2019.', until: 'do', today: 'Danas',
     ss_home: 'Lovostaj danas', ss_all: 'Ceo kalendar', warn_season: 'Pažnja: ova vrsta je u ovom periodu u lovostaju.', warn_size: 'Pažnja: riba je manja od najmanje dozvoljene dužine.', warn_banned: 'Pažnja: ova vrsta je trajno zaštićena, ulov je zabranjen.',
+    tomorrow: 'Sutra', sp_general: 'Opšte', bite_for: 'Za koju ribu', bite_now: 'Šansa za ulov sada', bite_hourly: 'Šansa po satima', bite_best: 'Najbolji termini',
+    bite_note2: 'Procena po satima: doba dana, solunarni periodi, promena pritiska za 12 h, procenjena temperatura vode, vetar i padavine. Nije garancija.',
+    sol_major: 'Glavni periodi', sol_minor: 'Sporedni', water_est: 'Voda (procena)', water_est_note: 'prosek vazduha za 4 dana',
+    r_dawn: 'svitanje/sumrak', r_major: 'glavni solunarni', r_minor: 'sporedni solunarni', r_p_fall: 'pritisak lagano pada', r_temp_good: 'dobra temperatura', r_night: 'noć',
     only_favs: 'Omiljena', last_stock: 'Poslednje poribljavanje', next_comp: 'Sledeće takmičenje',
     install: 'Instaliraj aplikaciju', kg: 'kg', cm: 'cm', from: 'od'
   },
@@ -119,6 +123,10 @@ const DICT = {
     ss_note: 'Tájékoztató adatok. A hatályos szabályok és a horgászengedélyed feltételei az irányadók. A tenyésztett halakkal telepített magántavakon a tó saját szabályai érvényesek lehetnek, ezt kérdezd meg a tulajdonostól.',
     ss_source: 'Forrás: Naredba o merama za očuvanje i zaštitu ribljeg fonda, Sl. glasnik RS 104/2009; kecsege: tilalom 2019-től.', until: 'eddig:', today: 'Ma',
     ss_home: 'Ma tilalom alatt', ss_all: 'Teljes naptár', warn_season: 'Figyelem: ez a faj ebben az időszakban tilalom alatt van.', warn_size: 'Figyelem: a hal kisebb a legkisebb kifogható méretnél.', warn_banned: 'Figyelem: ez a faj védett, kifogni tilos.',
+    tomorrow: 'Holnap', sp_general: 'Általános', bite_for: 'Melyik halra', bite_now: 'Kapás-esély most', bite_hourly: 'Kapás-esély óránként', bite_best: 'Legjobb időszakok',
+    bite_note2: 'Óránkénti becslés: napszak, szolunáris időszakok, 12 órás légnyomás-változás, becsült vízhőmérséklet, szél és csapadék. Nem garancia.',
+    sol_major: 'Fő időszakok', sol_minor: 'Mellék', water_est: 'Víz (becsült)', water_est_note: 'a levegő 4 napos átlaga',
+    r_dawn: 'hajnal/alkony', r_major: 'fő szolunáris', r_minor: 'mellék szolunáris', r_p_fall: 'lassan csökkenő légnyomás', r_temp_good: 'jó hőmérséklet', r_night: 'éjszaka',
     only_favs: 'Kedvencek', last_stock: 'Utolsó telepítés', next_comp: 'Következő verseny',
     install: 'Alkalmazás telepítése', kg: 'kg', cm: 'cm', from: 'tól'
   }

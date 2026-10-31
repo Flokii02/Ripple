@@ -489,3 +489,24 @@ body { background: var(--bg) linear-gradient(180deg, #E7EFF1 0, var(--bg) 340px)
 .sh-body .chip { font-size: 12px; padding: 3px 9px; }
 .sh-more { font-size: 13px; font-weight: 600; color: var(--lake-d); white-space: nowrap; }
 @media (max-width: 420px) { .sh-more { display: none; } }
+
+/* Részletes kapás-előrejelzés */
+.bite-sp { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin: -2px -2px 10px; padding: 2px; }
+.bite-sp::-webkit-scrollbar { display: none; }
+.bite-sp button { flex-shrink: 0; min-height: 34px; padding: 4px 12px; border-radius: 999px; border: 1px solid rgba(14, 42, 59, .15); background: rgba(255, 255, 255, .7); font-size: 13px; font-weight: 600; color: var(--ink-2); cursor: pointer; }
+.bite-sp button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+.bite-hours { display: flex; align-items: flex-end; gap: 2px; height: 56px; margin-top: 10px; }
+.bite-hours span { flex: 1 1 0; border-radius: 3px 3px 0 0; min-height: 4px; background: #C9D3D7; transform-origin: bottom; animation: growUp .6s ease both; }
+.bite-hours .bh-good { background: var(--ok); } .bite-hours .bh-mid { background: var(--sand); } .bite-hours .bh-low { background: #B9C6CB; }
+.bite-hours span.now { outline: 2px solid var(--ink); outline-offset: 1px; }
+@keyframes growUp { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+.bite-axis { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--mute); margin-top: 3px; }
+.bite-best { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; color: var(--ink); }
+.bite-best .bb { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; align-items: center; background: rgba(255, 255, 255, .75); border-radius: 10px; padding: 7px 10px; font-size: 13.5px; }
+.bite-best .bb span:first-child { font-weight: 700; white-space: nowrap; }
+.bite-best .bb .small { color: var(--mute); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bite-best .bb em { font-style: normal; font-weight: 700; color: var(--ok); }
+.wx-grid > div .small { display: block; line-height: 1.35; }
+.bite-best .bb { grid-template-columns: minmax(0, 1fr) auto; }
+.bite-best .bb .small { grid-column: 1 / -1; grid-row: 2; white-space: normal; font-size: 12px; }
+.bite-best .bb em { grid-row: 1; grid-column: 2; }

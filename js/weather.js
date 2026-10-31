@@ -1,6 +1,8 @@
 // Időjárás az Open-Meteo ingyenes szolgáltatásából (kulcs nélkül), 30 perces gyorsítótárral
 import { lang, t } from './i18n.js';
 import { esc, icon } from './ui.js';
+import { forecast, BITE_SPECIES } from './bite.js';
+import { speciesName } from './i18n.js';
 
 const API = 'https://api.open-meteo.com/v1/forecast';
 const TTL = 30 * 60 * 1000;
@@ -12,18 +14,20 @@ function cacheSet(k, data) { try { sessionStorage.setItem(k, JSON.stringify({ at
 
 // Egy tó részletes időjárása
 export async function lakeWeather(lat, lng) {
-  const key = `wx:${lat.toFixed(3)},${lng.toFixed(3)}`;
+  const key = `wx2:${lat.toFixed(3)},${lng.toFixed(3)}`;
   const hit = cacheGet(key); if (hit) return hit;
-  const u = `${API}?latitude=${lat}&longitude=${lng}&timezone=Europe%2FBelgrade&forecast_days=5&past_days=1`
+  const u = `${API}?latitude=${lat}&longitude=${lng}&timezone=Europe%2FBelgrade&forecast_days=5&past_days=5`
     + '&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,surface_pressure,precipitation,cloud_cover'
-    + '&hourly=surface_pressure'
+    + '&hourly=temperature_2m,surface_pressure,wind_speed_10m,cloud_cover,weather_code'
     + '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max,sunrise,sunset';
   const r = await fetch(u);
   if (!r.ok) throw new Error('weather');
   const d = await r.json();
   const out = {
     now: d.current,
+    hourly: d.hourly,
     trend: pressureTrend(d.hourly, d.current.time),
+    trend12: pressureTrend(d.hourly, d.current.time, 12),
     daily: d.daily.time.map((day, i) => ({
       day, code: d.daily.weather_code[i], max: d.daily.temperature_2m_max[i], min: d.daily.temperature_2m_min[i],
       rain: d.daily.precipitation_probability_max[i], wind: d.daily.wind_speed_10m_max[i],
@@ -53,12 +57,12 @@ export async function listWeather(points) {
 }
 
 // Légnyomás változása az elmúlt 3 órában (hPa)
-function pressureTrend(hourly, nowIso) {
+function pressureTrend(hourly, nowIso, span = 3) {
   if (!hourly?.time) return 0;
   const hour = nowIso.slice(0, 13);
   const i = hourly.time.findIndex(x => x.slice(0, 13) === hour);
-  if (i < 3) return 0;
-  return Math.round((hourly.surface_pressure[i] - hourly.surface_pressure[i - 3]) * 10) / 10;
+  if (i < span) return 0;
+  return Math.round((hourly.surface_pressure[i] - hourly.surface_pressure[i - span]) * 10) / 10;
 }
 
 // Időjárás-kód -> ikon és szöveg
@@ -131,7 +135,14 @@ export async function renderWeatherCard(box, lat, lng, opts = {}) {
   try {
     const w = await lakeWeather(lat, lng);
     const n = w.now, info = wxInfo(n.weather_code), tr = trendArrow(w.trend);
-    const mp = moonPhase(), bite = biteChance({ trend: w.trend, wind: n.wind_speed_10m, temp: n.temperature_2m, code: n.weather_code });
+    const mp = moonPhase();
+    let spKey = 'general'; try { spKey = localStorage.getItem('ripple_bite_sp') || 'general'; } catch (e) {}
+    if (!BITE_SPECIES[spKey]) spKey = 'general';
+    const fc = forecast(w, lat, lng, spKey);
+    const bite = fc.current || { score: 50, level: 'mid' };
+    const hm = d => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    const dayLbl = d => { const td = new Date(); return d.toDateString() === td.toDateString() ? t('today') : t('tomorrow'); };
+    const spName = k => k === 'general' ? t('sp_general') : speciesName(k);
     const today = w.daily[0] || {};
     const r1 = v => Math.round(v);
     let open = true;
@@ -151,14 +162,19 @@ export async function renderWeatherCard(box, lat, lng, opts = {}) {
         <div><div class="wx-temp">${r1(n.temperature_2m)}°</div><div class="small muted">${esc(info.text)} · ${esc(t('wx_feels'))} ${r1(n.apparent_temperature)}°</div></div>
       </div>
       <div class="bite bite-${bite.level}">
-        <div class="row" style="justify-content:space-between"><b>${esc(t('bite'))}</b><span class="bite-lvl">${esc(t('bite_' + bite.level))}</span></div>
+        <div class="bite-sp" role="group" aria-label="${esc(t('bite_for'))}">${Object.keys(BITE_SPECIES).map(k => `<button class="${k === spKey ? 'on' : ''}" data-bsp="${k}" aria-pressed="${k === spKey}">${esc(spName(k))}</button>`).join('')}</div>
+        <div class="row" style="justify-content:space-between"><b>${esc(t('bite_now'))}</b><span class="bite-lvl">${esc(t('bite_' + bite.level))} · ${bite.score}%</span></div>
         <div class="bite-bar"><span style="width:${bite.score}%"></span></div>
-        <div class="small" style="opacity:.8">${esc(t('bite_note'))}</div>
+        <div class="bite-hours" role="img" aria-label="${esc(t('bite_hourly'))}">${fc.hours.map(x => `<span class="bh-${x.level} ${x === fc.current ? 'now' : ''}" style="height:${Math.max(8, x.score)}%" title="${esc(dayLbl(x.t))} ${hm(x.t)}: ${x.score}%"></span>`).join('')}</div>
+        <div class="bite-axis">${fc.hours.filter((x, i) => i % 6 === 0).map(x => `<span>${hm(x.t)}</span>`).join('')}</div>
+        ${fc.best.length ? `<div class="bite-best"><b>${esc(t('bite_best'))}</b>${fc.best.map(b => `<div class="bb"><span>${esc(dayLbl(b.from))} ${hm(b.from)}–${hm(b.to)}</span><span class="small">${b.reasons.filter(r => ['dawn', 'major', 'minor', 'p_fall', 'temp_good', 'night'].includes(r)).slice(0, 3).map(r => esc(t('r_' + r))).join(' · ')}</span><em>${b.score}%</em></div>`).join('')}</div>` : ''}
+        <div class="small" style="opacity:.8;margin-top:8px">${esc(t('bite_note2'))}</div>
       </div>
       <div class="wx-grid">
         <div>${icon('wind', 18)}<small>${esc(t('wx_wind'))}</small><b>${r1(n.wind_speed_10m)} km/h</b></div>
-        <div>${icon('gauge', 18)}<small>${esc(t('wx_pressure'))}</small><b>${r1(n.surface_pressure)} hPa <span class="tr tr-${tr.k}" title="${esc(t('p_' + tr.k))}">${tr.a}</span></b><span class="small muted">${esc(t('p_' + tr.k))}${w.trend ? ` (${w.trend > 0 ? '+' : ''}${String(w.trend).replace('.', ',')}/3h)` : ''}</span></div>
-        <div>${icon('moonph', 18)}<small>${esc(t('wx_moon'))}</small><b>${esc(moonName(mp))}</b></div>
+        <div>${icon('gauge', 18)}<small>${esc(t('wx_pressure'))}</small><b>${r1(n.surface_pressure)} hPa <span class="tr tr-${tr.k}" title="${esc(t('p_' + tr.k))}">${tr.a}</span></b><span class="small muted">${esc(t('p_' + tr.k))}${w.trend ? ` (${w.trend > 0 ? '+' : ''}${String(w.trend).replace('.', ',')}/3h)` : ''}${w.trend12 ? `, ${w.trend12 > 0 ? '+' : ''}${String(w.trend12).replace('.', ',')}/12h` : ''}</span></div>
+        <div>${icon('moonph', 18)}<small>${esc(t('wx_moon'))}</small><b>${esc(moonName(mp))}</b>${fc.solunar.major.length ? `<span class="small muted">${esc(t('sol_major'))}: ${fc.solunar.major.map(p => hm(p.from) + '–' + hm(p.to)).join(', ')}</span>` : ''}${fc.solunar.minor.length ? `<span class="small muted">${esc(t('sol_minor'))}: ${fc.solunar.minor.map(p => hm(p.from) + '–' + hm(p.to)).join(', ')}</span>` : ''}</div>
+        ${fc.water != null ? `<div>${icon('lake', 18)}<small>${esc(t('water_est'))}</small><b>~${Math.round(fc.water)}°</b><span class="small muted">${esc(t('water_est_note'))}</span></div>` : ''}
         <div>${icon('sunrise', 18)}<small>${esc(t('wx_sunrise'))} / ${esc(t('wx_sunset'))}</small><b>${fmtTime(today.sunrise)} – ${fmtTime(today.sunset)}</b></div>
       </div>
       <div class="wx-days">${w.daily.slice(0, 5).map(d => { const i = wxInfo(d.code); return `
@@ -169,6 +185,11 @@ export async function renderWeatherCard(box, lat, lng, opts = {}) {
     box.innerHTML = `${opts.head ?? `<h2>${esc(t('wx_title'))}</h2>`}<p class="muted small">${esc(t('wx_err'))}</p>`;
     return;
   }
+  box.querySelectorAll('[data-bsp]').forEach(b => b.onclick = () => {
+    try { localStorage.setItem('ripple_bite_sp', b.dataset.bsp); } catch (e) {}
+    const wasOpen = !box.classList.contains('wx-collapsed');
+    renderWeatherCard(box, lat, lng, opts).then(() => { if (opts.collapsible && wasOpen) { box.classList.remove('wx-collapsed'); } });
+  });
   const sum = box.querySelector('.wx-sum');
   if (sum) sum.onclick = () => {
     const nowOpen = box.classList.contains('wx-collapsed');
