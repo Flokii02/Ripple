@@ -510,3 +510,49 @@ body { background: var(--bg) linear-gradient(180deg, #E7EFF1 0, var(--bg) 340px)
 .bite-best .bb { grid-template-columns: minmax(0, 1fr) auto; }
 .bite-best .bb .small { grid-column: 1 / -1; grid-row: 2; white-space: normal; font-size: 12px; }
 .bite-best .bb em { grid-row: 1; grid-column: 2; }
+
+/* --- Kötelező mezők --- */
+.req { color: var(--bad); font-weight: 700; }
+.req-note { margin: -4px 0 12px; }
+.field.bad input, .field.bad select, .field.bad textarea, .field.bad .pick-map { border-color: var(--bad); outline: 2px solid var(--bad-l); }
+.field.bad > span { color: var(--bad); }
+
+/* --- Offline --- */
+.pending-box { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 16px; }
+.pending-box .ic { flex-shrink: 0; margin-top: 2px; }
+
+/* --- Saját helyek --- */
+.map.spots-map { height: 300px; border-radius: var(--r); overflow: hidden; border: 1px solid var(--line); }
+.modal .pick-map { height: 240px; }
+.pin.spot { background: var(--ok); }
+.spot-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.spot-card h3 { font-size: 17px; }
+.spot-ic { width: 40px; height: 40px; border-radius: 12px; background: var(--ok-l); color: var(--ok); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.spot-actions { margin-top: 12px; gap: 8px; flex-wrap: wrap; }
+
+/* --- Admin statisztika --- */
+.adm-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.adm-stats .stat em { display: block; font-style: normal; font-size: 12.5px; color: var(--ok); font-weight: 600; }
+.adm-stats .stat em.w { color: var(--warn); }
+
+/* --- A hónap fogása --- */
+.cotm { display: grid; gap: 10px; }
+.cotm-row { display: flex; align-items: center; gap: 12px; background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 10px 12px; }
+.cotm-row .rk { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font: 700 16px var(--display); background: var(--lake-l); color: var(--lake-d); flex-shrink: 0; }
+.cotm-row:nth-child(1) .rk { background: var(--sand); color: #fff; }
+.cotm-row:nth-child(2) .rk { background: #B9C6CC; color: #fff; }
+.cotm-row:nth-child(3) .rk { background: #C98B57; color: #fff; }
+.cotm-row .ph { width: 56px; height: 56px; border-radius: 10px; object-fit: cover; background: var(--lake-l); flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--lake); overflow: hidden; }
+.cotm-row .ph img { width: 100%; height: 100%; object-fit: cover; }
+.cotm-row .wt { font: 700 19px var(--display); color: var(--lake-d); white-space: nowrap; }
+
+/* --- Túratervező --- */
+.trip-days { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
+.trip-days button { flex: 0 0 auto; border: 1px solid var(--line); background: var(--card); border-radius: 12px; padding: 8px 12px; font: 600 13.5px var(--body); color: var(--ink-2); cursor: pointer; min-width: 64px; }
+.trip-days button.on { background: var(--lake); border-color: var(--lake); color: #fff; }
+.trip-win { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-radius: 12px; background: var(--ok-l); margin-bottom: 6px; }
+.trip-win b { font: 600 16px var(--display); }
+.trip-check { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; }
+.trip-check label { display: flex; gap: 10px; align-items: center; padding: 6px 0; cursor: pointer; }
+.trip-check input { width: 20px; height: 20px; accent-color: var(--lake); }
+.trip-check input:checked + span { text-decoration: line-through; color: var(--mute); }

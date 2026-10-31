@@ -81,6 +81,15 @@ export function compressImage(file, max = 1600, quality = 0.82) {
     img.src = url;
   });
 }
+// Hibaüzenet: túl sok beküldés / fotó limit / általános
+export function errText(e) {
+  const m = String(e?.message || e || '');
+  if (m.includes('rate_limit')) return t('err_rate');
+  if (m.includes('photo_limit')) return t('photo_limit');
+  return t('error');
+}
+// Kis előnézeti kép listákhoz (~400 px)
+export function makeThumb(file) { return compressImage(file, 400, 0.72); }
 export function randomName() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8) + '.jpg';
 }
@@ -116,6 +125,12 @@ const I = {
   moonph: '<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16Z" fill="currentColor"/>',
   share: '<circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4"/>',
   mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+  spot: '<path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11Z"/><path d="M9 10h6M12 7v6"/>',
+  cloud: '<path d="M7 18h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.5A3.5 3.5 0 0 0 7 18Z"/>',
+  calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  download: '<path d="M12 4v11M7 10l5 5 5-5M4 20h16"/>',
+  chart: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  link: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
   lake: '<path d="M3 15c3-2 6 2 9 0s6 2 9 0M3 19c3-2 6 2 9 0s6 2 9 0"/><path d="M8 11c0-3 2-6 4-7 2 1 4 4 4 7"/>'
 };
 export function icon(name, size = 20) {

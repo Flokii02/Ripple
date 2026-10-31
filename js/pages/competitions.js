@@ -1,6 +1,8 @@
 import { sb } from '../config.js';
 import { t } from '../i18n.js';
-import { $, $$, esc, icon, fmtDate, fmtMonth, fmtMoney, todayStr, openModal, closeModal, toast, spinner, share, shareUrl } from '../ui.js';
+import { catchPhotoUrls } from '../ui.js';
+import { speciesName } from '../i18n.js';
+import { $, $$, esc, icon, fmtDate, fmtMonth, fmtMoney, todayStr, openModal, closeModal, toast, spinner, share, shareUrl, errText } from '../ui.js';
 import { go } from '../app.js';
 
 let mode = 'upcoming';
@@ -18,7 +20,10 @@ export async function render(el, _p, ctx) {
     </div>
     <div id="mine"></div>
     <div id="list">${spinner()}</div>
+    <div class="section" id="cotmSec"><h2>${icon('trophy', 22)} ${esc(t('cotm_title'))} · ${esc(fmtMonth(todayStr()))}</h2>
+      <p class="small muted" style="margin-top:-6px">${esc(t('cotm_note'))}</p><div id="cotm">${spinner()}</div></div>
   </div>`;
+  loadCotm();
 
   const load = async () => {
     const today = todayStr();
@@ -97,7 +102,28 @@ export async function openCompForm(ctx, presetLakeId, done) {
       contact: $('#cContact', body).value.trim() || null, description: $('#cDesc', body).value.trim() || null
     });
     $('#cSave', body).disabled = false;
-    if (error) { console.error(error); $('#cErr', body).textContent = t('error'); return; }
+    if (error) { console.error(error); $('#cErr', body).textContent = errText(error); return; }
     closeModal(); toast(t('pending_note')); done && done();
   };
+}
+
+// A hónap fogása: a hónap legnehezebb nyilvános fogásai
+async function loadCotm() {
+  const now = new Date();
+  const from = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const { data } = await sb.from('catches')
+    .select('id, species, weight_kg, length_cm, caught_at, photo_path, thumb_path, released, water_name, lakes(name, slug), profiles!catches_user_profile_fk(display_name)')
+    .eq('is_public', true).gte('caught_at', from).not('weight_kg', 'is', null)
+    .order('weight_kg', { ascending: false }).limit(10);
+  const box = document.getElementById('cotm'); if (!box) return;
+  const list = data || [];
+  if (!list.length) { box.innerHTML = `<div class="empty small">${icon('fish', 36)}<p>${esc(t('cotm_empty'))}</p></div>`; return; }
+  const urls = await catchPhotoUrls(list.map(c => c.thumb_path || c.photo_path));
+  box.innerHTML = `<div class="cotm">${list.map((c, i) => `
+    <div class="cotm-row"><span class="rk">${i + 1}</span>
+      <span class="ph">${urls[c.thumb_path || c.photo_path] ? `<img src="${esc(urls[c.thumb_path || c.photo_path])}" alt="" loading="lazy">` : icon('fish', 26)}</span>
+      <div class="grow" style="min-width:0"><b>${esc(speciesName(c.species))}</b>
+        <div class="small muted">${esc(c.profiles?.display_name || '')} · ${c.lakes ? `<a href="#/jezero/${esc(c.lakes.slug)}">${esc(c.lakes.name)}</a>` : esc(c.water_name || '')}</div>
+        <div class="small muted">${esc(fmtDate(c.caught_at))}${c.released ? ' · ' + esc(t('released')) : ''}</div></div>
+      <span class="wt">${esc(Number(c.weight_kg).toLocaleString('sr-RS'))} ${esc(t('kg'))}</span></div>`).join('')}</div>`;
 }

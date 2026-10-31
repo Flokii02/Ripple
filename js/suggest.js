@@ -1,7 +1,7 @@
 // Tó javaslása (horgászoknak): csak az adminhoz érkezik, nem nyilvános
 import { sb } from './config.js';
 import { t } from './i18n.js';
-import { $, esc, openModal, closeModal, toast } from './ui.js';
+import { $, esc, openModal, closeModal, toast, errText } from './ui.js';
 import { go } from './app.js';
 
 export function isOwner(ctx) { return !!ctx.user && (ctx.profile?.role === 'owner' || ctx.isAdmin); }
@@ -26,7 +26,7 @@ export function openSuggest(ctx) {
       contact: $('#sgContact', body).value.trim() || null, note: $('#sgNote', body).value.trim() || null
     });
     $('#sgSave', body).disabled = false;
-    if (error) { console.error(error); $('#sgErr', body).textContent = t('error'); return; }
+    if (error) { console.error(error); $('#sgErr', body).textContent = errText(error); return; }
     closeModal(); toast(t('suggest_sent'));
   };
 }

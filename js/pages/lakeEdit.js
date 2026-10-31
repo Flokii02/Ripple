@@ -1,6 +1,6 @@
 import { sb, MAP_CENTER, MAP_ZOOM } from '../config.js';
 import { t, SPECIES, speciesName } from '../i18n.js';
-import { $, $$, esc, icon, toast, slugify, lakePhotoUrl, compressImage, randomName, fmtDate, todayStr } from '../ui.js';
+import { $, $$, esc, icon, toast, slugify, lakePhotoUrl, compressImage, makeThumb, randomName, fmtDate, todayStr, errText } from '../ui.js';
 import { go } from '../app.js';
 import { openCompForm } from './competitions.js';
 import { isOwner, openSuggest, ownersOnlyHTML } from '../suggest.js';
@@ -68,6 +68,7 @@ export async function render(el, [idParam], ctx) {
       <div class="card">
         <div class="photo-grid" id="photos"></div>
         <label class="btn ghost upload-btn" style="margin-top:12px">${icon('camera', 18)}${esc(t('upload_photos'))}<input type="file" id="phUp" accept="image/*" multiple></label>
+        <p class="small muted" id="phCount" style="margin-top:8px"></p>
       </div>
     </div>
     <div class="section"><h2>${esc(t('stockings'))}</h2>
@@ -128,12 +129,12 @@ export async function render(el, [idParam], ctx) {
         if (!res.error || res.error.code !== '23505') break;
       }
       $('#lSave').disabled = false;
-      if (res.error) { console.error(res.error); $('#lErr').textContent = t('error'); return; }
+      if (res.error) { console.error(res.error); $('#lErr').textContent = errText(res.error); return; }
       toast(t('saved')); go('/moja-jezera/' + res.data.id);
     } else {
       const { error } = await sb.from('lakes').update(row).eq('id', lake.id);
       $('#lSave').disabled = false;
-      if (error) { console.error(error); $('#lErr').textContent = t('error'); return; }
+      if (error) { console.error(error); $('#lErr').textContent = errText(error); return; }
       Object.assign(lake, row); toast(t('saved'));
     }
   };
@@ -160,30 +161,38 @@ export async function render(el, [idParam], ctx) {
   // Fotók
   const loadPhotos = async () => {
     const { data } = await sb.from('lake_photos').select('*').eq('lake_id', lake.id).order('sort').order('id');
-    $('#photos').innerHTML = (data || []).map(p => `<div class="ph"><img src="${esc(lakePhotoUrl(p.path))}" alt="" loading="lazy"><button data-ph="${p.id}" data-path="${esc(p.path)}" aria-label="${esc(t('delete'))}">${icon('trash', 16)}</button></div>`).join('');
+    $('#photos').innerHTML = (data || []).map(p => `<div class="ph"><img src="${esc(lakePhotoUrl(p.path))}" alt="" loading="lazy"><button data-ph="${p.id}" data-path="${esc(p.path)}" data-thumb="${esc(p.thumb_path || '')}" aria-label="${esc(t('delete'))}">${icon('trash', 16)}</button></div>`).join('');
     $$('#photos [data-ph]').forEach(b => b.onclick = async () => {
       if (!confirm(t('confirm_delete'))) return;
       await sb.from('lake_photos').delete().eq('id', b.dataset.ph);
-      await sb.storage.from('lake-photos').remove([b.dataset.path]);
+      await sb.storage.from('lake-photos').remove([b.dataset.path, b.dataset.thumb].filter(Boolean));
       loadPhotos();
     });
+    $('#phCount').textContent = t('photo_count').replace('{n}', (data || []).length).replace('{max}', 12);
+    $('#phUp').disabled = (data || []).length >= 12;
     return data || [];
   };
   let current = await loadPhotos();
   $('#phUp').onchange = async e => {
-    const files = [...e.target.files].slice(0, 12);
-    if (!files.length) return;
+    const free = 12 - current.length;
+    const all = [...e.target.files];
+    if (all.length > free) toast(t('photo_limit'), 'err');
+    const files = all.slice(0, Math.max(0, free));
+    if (!files.length) { e.target.value = ''; return; }
     toast(t('loading'));
     let sort = current.length;
     for (const f of files) {
       try {
         const blob = await compressImage(f);
-        const path = `${lake.id}/${randomName()}`;
+        const thumb = await makeThumb(f);
+        const name = randomName();
+        const path = `${lake.id}/${name}`, thumb_path = `${lake.id}/t_${name}`;
         const up = await sb.storage.from('lake-photos').upload(path, blob, { contentType: 'image/jpeg' });
         if (up.error) throw up.error;
-        const ins = await sb.from('lake_photos').insert({ lake_id: lake.id, path, sort: sort++ });
-        if (ins.error) throw ins.error;
-      } catch (err) { console.error(err); toast(t('error'), 'err'); }
+        await sb.storage.from('lake-photos').upload(thumb_path, thumb, { contentType: 'image/jpeg' });
+        const ins = await sb.from('lake_photos').insert({ lake_id: lake.id, path, thumb_path, sort: sort++ });
+        if (ins.error) { await sb.storage.from('lake-photos').remove([path, thumb_path]); throw ins.error; }
+      } catch (err) { console.error(err); toast(String(err.message || '').includes('photo_limit') ? t('photo_limit') : t('error'), 'err'); break; }
     }
     e.target.value = '';
     current = await loadPhotos(); toast(t('saved'));

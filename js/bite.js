@@ -43,7 +43,8 @@ function moonPhaseAt(t) {
 }
 
 // Óránkénti pontszám a következő ~36 órára
-export function forecast(wx, lat, lng, speciesKey = 'general') {
+// range: { from, to } – egy adott napra (túratervező); alapból most-1 óra … +36 óra
+export function forecast(wx, lat, lng, speciesKey = 'general', range = null) {
   const sp = BITE_SPECIES[speciesKey] || BITE_SPECIES.general;
   const h = wx.hourly;
   const now = new Date();
@@ -58,7 +59,8 @@ export function forecast(wx, lat, lng, speciesKey = 'general') {
 
   const out = [];
   times.forEach((t, i) => {
-    if (t < now - H || t > +now + 36 * H) return;
+    const lo = range ? range.from : now - H, hi = range ? range.to : +now + 36 * H;
+    if (t < lo || t > hi) return;
     let s = 42;
     const reasons = [];
     // Víz- és léghőmérséklet (a víz lassan változik: a becsült víz és a pillanatnyi levegő keveréke)
@@ -97,13 +99,13 @@ export function forecast(wx, lat, lng, speciesKey = 'general') {
 
   // A legjobb 3 időablak (2 órás blokkok, nem fedik egymást)
   const blocks = out.slice(0, -1).map((x, k) => ({ from: x.t, to: new Date(+out[k + 1].t + H), score: Math.round((x.score + out[k + 1].score) / 2), reasons: [...new Set([...x.reasons, ...out[k + 1].reasons])] }))
-    .filter(b => b.to > now);
+    .filter(b => b.to > now && (!range || +b.to - +b.from === 2 * H));
   const best = [];
   blocks.slice().sort((a, b) => b.score - a.score).forEach(b => {
     if (best.length < 3 && b.score >= 50 && !best.some(x => b.from < x.to && b.to > x.from)) best.push(b);
   });
   best.sort((a, b) => a.from - b.from);
   const cur = out.find(x => x.t <= now && +x.t + H > now) || out[0];
-  const today = new Date();
+  const today = range ? new Date(range.from) : new Date();
   return { hours: out, best, current: cur, water, solunar: solOf(today) };
 }

@@ -1,6 +1,6 @@
 import { sb } from '../config.js';
 import { t, lang } from '../i18n.js';
-import { $, esc, icon, logoMark, toast } from '../ui.js';
+import { $, esc, icon, logoMark, toast, errText } from '../ui.js';
 
 const ABOUT = {
   sr: `<p>Ripple okuplja na jednom mestu jezera za sportski ribolov, takmičenja i dnevnik ulova. Nastao je u Vojvodini, za pecaroše i vlasnike jezera iz našeg kraja, na srpskom i mađarskom jeziku.</p>
@@ -34,7 +34,7 @@ export async function render(el, _p, ctx) {
     $('#cmSend').disabled = true;
     const { error } = await sb.from('contact_messages').insert({ name, email, message, user_id: ctx.user?.id || null });
     $('#cmSend').disabled = false;
-    if (error) { console.error(error); $('#cmErr').textContent = t('error'); return; }
+    if (error) { console.error(error); $('#cmErr').textContent = errText(error); return; }
     $('#cmMsg').value = ''; $('#cmErr').textContent = ''; toast(t('sent_ok'));
   };
 }

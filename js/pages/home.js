@@ -64,16 +64,19 @@ export async function render(el, _p, ctx) {
   const getLoc = () => { try { return JSON.parse(localStorage.getItem('ripple_wx_loc') || 'null'); } catch (e) { return null; } };
   const setLoc = l => { try { localStorage.setItem('ripple_wx_loc', JSON.stringify(l)); } catch (e) {} };
   let lakeOpts = [];
+  let spotOpts = [];
+  if (ctx?.user) { try { spotOpts = JSON.parse(localStorage.getItem('ripple_spots_cache') || '[]'); } catch (e) {} }
   let wxSeq = 0;
   const drawWx = () => {
     const my = ++wxSeq;
     const loc = getLoc() || { kind: 'region', lat: REGION[0], lng: REGION[1] };
-    const sel = loc.kind === 'lake' ? 'lake:' + loc.id : loc.kind === 'town' ? 'town:' + loc.id : loc.kind;
+    const sel = loc.kind === 'lake' ? 'lake:' + loc.id : loc.kind === 'town' ? 'town:' + loc.id : loc.kind === 'spot' ? 'spot:' + loc.id : loc.kind;
     const head = `<div class="wx-head"><h2>${esc(t('wx_today'))}</h2>
       <label class="wx-loc"><span class="sr-only">${esc(t('loc_label'))}</span>${icon('pin', 16)}
         <select id="wxLoc">
           <option value="region" ${sel === 'region' ? 'selected' : ''}>${esc(t('loc_region'))}</option>
           <option value="mine" ${sel === 'mine' ? 'selected' : ''}>${esc(t('my_location'))}</option>
+          ${spotOpts.length ? `<optgroup label="${esc(t('spots_title'))}">${spotOpts.map(x => `<option value="spot:${x.id}" ${sel === 'spot:' + x.id ? 'selected' : ''}>${esc(x.name)}${x.water ? ' – ' + esc(x.water) : ''}</option>`).join('')}</optgroup>` : ''}
           <optgroup label="${esc(t('place'))}">${TOWNS.map(x => `<option value="town:${x[0]}" ${sel === 'town:' + x[0] ? 'selected' : ''}>${esc(x[0])}</option>`).join('')}</optgroup>
           ${lakeOpts.length ? `<optgroup label="${esc(t('nav_lakes'))}">${lakeOpts.map(l => `<option value="lake:${l.id}" ${sel === 'lake:' + l.id ? 'selected' : ''}>${esc(l.name)}</option>`).join('')}</optgroup>` : ''}
         </select></label></div>`;
@@ -93,6 +96,7 @@ export async function render(el, _p, ctx) {
           err => { drawWx(); setTimeout(() => showLocHelp(err && err.code === 1 ? 'loc_help_denied' : 'loc_denied'), 50); },
           { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 });
       } else if (v.startsWith('town:')) { const tw = TOWNS.find(x => 'town:' + x[0] === v); if (tw) { setLoc({ kind: 'town', id: tw[0], lat: tw[1], lng: tw[2] }); drawWx(); } }
+      else if (v.startsWith('spot:')) { const x = spotOpts.find(o => 'spot:' + o.id === v); if (x) { setLoc({ kind: 'spot', id: x.id, lat: x.lat, lng: x.lng }); drawWx(); } }
       else { const l = lakeOpts.find(x => 'lake:' + x.id === v); if (l) { setLoc({ kind: 'lake', id: l.id, lat: l.lat, lng: l.lng }); drawWx(); } }
     };
   };
@@ -101,16 +105,25 @@ export async function render(el, _p, ctx) {
     if (h && !$('#wxHelp')) h.insertAdjacentHTML('afterend', `<div class="notice" id="wxHelp" style="grid-column:1/-1">${esc(t(key))}</div>`);
   };
   drawWx();
+  // Saját helyek frissítése a háttérben (újrarajzolás nélkül)
+  if (ctx?.user) sb.from('spots').select('id, name, water, lat, lng').eq('user_id', ctx.user.id).order('name').then(({ data: sp }) => {
+    if (!sp) return;
+    try { localStorage.setItem('ripple_spots_cache', JSON.stringify(sp)); } catch (e) {}
+    const s = $('#wxLoc');
+    if (!sp.length || !s || s.querySelector('option[value^="spot:"]')) return;
+    spotOpts = sp;
+    s.querySelector('option[value="mine"]').insertAdjacentHTML('afterend', `<optgroup label="${esc(t('spots_title'))}">${sp.map(x => `<option value="spot:${x.id}">${esc(x.name)}${x.water ? ' – ' + esc(x.water) : ''}</option>`).join('')}</optgroup>`);
+  });
 
   const map = L.map('map', { scrollWheelZoom: true }).setView(MAP_CENTER, MAP_ZOOM);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; OpenStreetMap' }).addTo(map);
   const layer = L.layerGroup().addTo(map);
 
   const { data, error } = await sb.from('lakes')
-    .select('id, slug, name, place, lat, lng, price_day, price_night, species, night_fishing, accommodation, food, boat, plan, lake_photos(path, sort)')
+    .select('id, slug, name, place, lat, lng, price_day, price_night, species, night_fishing, accommodation, food, boat, plan, lake_photos(path, thumb_path, sort)')
     .eq('status', 'approved').order('name');
   if (error) { $('#list').innerHTML = `<div class="empty">${esc(t('error'))}</div>`; return; }
-  LAKES = (data || []).map(l => ({ ...l, photo: (l.lake_photos || []).sort((a, b) => a.sort - b.sort)[0]?.path || null }));
+  LAKES = (data || []).map(l => ({ ...l, photo: (l.lake_photos || []).sort((a, b) => a.sort - b.sort)[0] })).map(l => ({ ...l, photo: l.photo ? (l.photo.thumb_path || l.photo.path) : null }));
   lakeOpts = LAKES.filter(l => l.lat && l.lng);
   // A tavakat a választóhoz adjuk hozzá újrarajzolás nélkül (hogy ne ugorjon vissza a választás)
   if (lakeOpts.length) {

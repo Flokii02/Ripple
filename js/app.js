@@ -1,6 +1,6 @@
 import { sb } from './config.js';
 import { t, lang, setLang } from './i18n.js';
-import { $, esc, icon, logoMark, closeModal, spinner } from './ui.js';
+import { $, esc, icon, logoMark, closeModal, spinner, toast } from './ui.js';
 
 // Közös állapot: ki van belépve
 export const ctx = { user: null, profile: null, isAdmin: false };
@@ -34,6 +34,7 @@ const ROUTES = [
   [/^\/omiljena$/, 'favorites'],
   [/^\/o-nama$/, 'about'],
   [/^\/lovostaj$/, 'seasons'],
+  [/^\/mesta$/, 'spots'],
   [/^\/(privatnost|uslovi)$/, 'legal']
 ];
 const PAGES = {
@@ -47,6 +48,7 @@ const PAGES = {
   auth: () => import('./pages/auth.js'),
   profile: () => import('./pages/profile.js'),
   favorites: () => import('./pages/favorites.js'),
+  spots: () => import('./pages/spots.js'),
   about: () => import('./pages/about.js'),
   seasons: () => import('./pages/seasons.js'),
   legal: () => import('./pages/legal.js')
@@ -130,6 +132,13 @@ async function init() {
   });
   window.addEventListener('hashchange', route);
   route();
+  // Net nélkül mentett fogások feltöltése indításkor és amikor visszajön a net
+  const sync = () => ctx.user && import('./offline.js').then(m => m.flushQueue(ctx, n => {
+    toast(t('offline_synced').replace('{n}', n));
+    if (location.hash.startsWith('#/dnevnik') && $('#modal').hidden) route();
+  })).catch(() => {});
+  setTimeout(sync, 2500);
+  window.addEventListener('online', sync);
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 export async function reloadSession() { await loadSession(); }
