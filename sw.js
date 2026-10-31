@@ -1,7 +1,7 @@
 // Service worker: saját fájlok – hálózat először, offline esetén a gyorsítótár.
 // A CDN-könyvtárak (Supabase, Leaflet) és a betűtípusok verziózottak, ezért gyorsítótárból jönnek,
 // így az app net nélkül is elindul (pl. a vízparton a fogás mentéséhez).
-const CACHE = 'ripple-v14';
+const CACHE = 'ripple-v15';
 const CDN = ['cdn.jsdelivr.net', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 const CORE = ['./', 'index.html', 'css/app.css', 'js/app.js', 'js/config.js', 'js/i18n.js', 'js/ui.js', 'js/weather.js', 'js/bite.js',
   'js/seasons.js', 'js/offline.js', 'js/catchcard.js', 'js/install.js', 'js/vendor/suncalc.js', 'js/pages/log.js', 'js/pages/home.js', 'js/pages/spots.js',

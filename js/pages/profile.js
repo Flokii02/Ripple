@@ -14,6 +14,7 @@ export async function render(el, _p, ctx) {
       <a href="#/omiljena">${icon('heart')}${esc(t('favs'))}</a>
       <a href="#/mesta">${icon('spot')}${esc(t('spots_title'))}</a>
       <a href="#/dnevnik">${icon('book')}${esc(t('nav_log'))}</a>
+      <a href="#/ulovi">${icon('fish')}${esc(t('feed_title'))}</a>
       ${p.role === 'owner' || ctx.isAdmin ? `<a href="#/moja-jezera">${icon('lake')}${esc(t('my_lakes'))}</a>` : `<button id="pSuggest">${icon('plus')}${esc(t('suggest_lake'))}</button>`}
       <a href="#/takmicenja">${icon('trophy')}${esc(t('nav_comp'))}</a>
       <a href="#/lovostaj">${icon('shield')}${esc(t('seasons'))}</a>

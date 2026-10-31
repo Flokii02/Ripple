@@ -14,7 +14,7 @@ export async function render(el, _p, ctx) {
   }
   el.innerHTML = `
   <div class="page">
-    <div class="page-head"><h1>${esc(t('log_title'))}</h1><div class="row"><a class="btn ghost" href="#/mesta">${icon('spot', 18)}${esc(t('spots_title'))}</a><button class="btn lake" id="addCatch">${icon('plus', 18)}${esc(t('log_add'))}</button></div></div>
+    <div class="page-head"><h1>${esc(t('log_title'))}</h1><div class="row"><a class="btn ghost" href="#/ulovi">${icon('fish', 18)}${esc(t('feed_title'))}</a><a class="btn ghost" href="#/mesta">${icon('spot', 18)}${esc(t('spots_title'))}</a><button class="btn lake" id="addCatch">${icon('plus', 18)}${esc(t('log_add'))}</button></div></div>
     <div id="pending"></div>
     <div class="stats" id="stats"></div>
     <div id="insights"></div>
@@ -161,6 +161,7 @@ async function openCatchForm(ctx, c, done) {
     // Hely az időjáráshoz: tó, saját hely, különben a főoldalon választott hely
     const lk = (lakes || []).find(l => l.id === row.lake_id && l.lat && l.lng);
     const sp = spots.find(s => s.id === row.spot_id);
+    if (sp && !row.water_name && sp.water) row.water_name = sp.water; // nyilvános listában csak a folyó neve látszik, a pontos hely nem
     let pt = lk ? [lk.lat, lk.lng] : sp ? [sp.lat, sp.lng] : null;
     if (!pt) { try { const sv = JSON.parse(localStorage.getItem('ripple_wx_loc') || 'null'); if (sv?.lat) pt = [sv.lat, sv.lng]; } catch (e) {} }
     if (!pt && row.water_name) pt = MAP_CENTER;

@@ -85,6 +85,8 @@ const DICT = {
     trip_season_ok: 'Nije u lovostaju.', trip_closed: 'U lovostaju je tog dana!', trip_checklist: 'Ne zaboravi', trip_price: 'Cena',
     trip_items: 'Ribolovačka dozvola|Mamci i hrana|Podmetač i podloga za ribu|Krpa, klešta, dezinfekcija|Čeona lampa|Voda i hrana|Punjač za telefon',
     trip_share: 'Pošalji plan', trip_title: 'Pecanje: {lake}, {day}',
+    feed_title: 'Javni ulovi', feed_sub: 'Najnoviji ulovi koje su ribolovci podelili.', feed_more: 'Prikaži još', feed_empty: 'Još nema javnih ulova. Označi „Javno” kad čuvaš ulov u dnevniku.',
+    feed_hide: 'Sakrij (moderacija)', feed_hide_q: 'Sakriti ovaj ulov iz javnog prikaza? Ostaje u dnevniku vlasnika.', feed_hidden: 'Ulov je sakriven.', feed_all: 'Svi javni ulovi',
     inst_short: 'Ikonica na početnom ekranu, radi i bez interneta.', inst_btn: 'Instaliraj', inst_why: 'Ripple radi kao prava aplikacija: ikonica na telefonu, ceo ekran, ulov možeš da sačuvaš i bez interneta.',
     inst_ios: 'Otvori stranicu u Safariju|Dodirni dugme Deli (kvadrat sa strelicom nagore) na dnu|Izaberi „Dodaj na početni ekran”|Dodirni „Dodaj” – Ripple ikonica je na telefonu',
     inst_ios_note: 'Na iPhone-u instalacija radi samo iz Safarija.', inst_android: 'Otvori meni pregledača (tri tačke gore desno)|Izaberi „Instaliraj aplikaciju” ili „Dodaj na početni ekran”|Potvrdi – Ripple ikonica je na telefonu'
@@ -174,6 +176,8 @@ const DICT = {
     trip_season_ok: 'Nincs tilalom alatt.', trip_closed: 'Aznap tilalom alatt van!', trip_checklist: 'Ne felejtsd el', trip_price: 'Ár',
     trip_items: 'Horgászengedély|Csali és etetőanyag|Pontybölcső / matrac|Törölköző, fogó, fertőtlenítő|Fejlámpa|Víz és ennivaló|Telefontöltő',
     trip_share: 'Terv elküldése', trip_title: 'Horgászat: {lake}, {day}',
+    feed_title: 'Nyilvános fogások', feed_sub: 'A horgászok legfrissebb megosztott fogásai.', feed_more: 'Továbbiak', feed_empty: 'Még nincs nyilvános fogás. Pipáld be a „Nyilvános” mezőt, amikor fogást mentesz a naplóba.',
+    feed_hide: 'Elrejtés (moderálás)', feed_hide_q: 'Elrejted ezt a fogást a nyilvános listából? A tulajdonos naplójában megmarad.', feed_hidden: 'A fogás elrejtve.', feed_all: 'Összes nyilvános fogás',
     inst_short: 'Ikon a kezdőképernyőn, internet nélkül is működik.', inst_btn: 'Telepítés', inst_why: 'A Ripple igazi alkalmazásként működik: ikon a telefonon, teljes képernyő, a fogást net nélkül is elmentheted.',
     inst_ios: 'Nyisd meg az oldalt Safariban|Koppints alul a Megosztás gombra (négyzet felfelé mutató nyíllal)|Válaszd: „Főképernyőhöz adás”|Koppints a „Hozzáadás” gombra – kész, a Ripple ikon a telefonon van',
     inst_ios_note: 'iPhone-on a telepítés csak Safariból működik.', inst_android: 'Nyisd meg a böngésző menüjét (három pont jobb fent)|Válaszd: „Alkalmazás telepítése” vagy „Hozzáadás a kezdőképernyőhöz”|Erősítsd meg – kész, a Ripple ikon a telefonon van'

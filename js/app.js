@@ -36,6 +36,7 @@ const ROUTES = [
   [/^\/o-nama$/, 'about'],
   [/^\/lovostaj$/, 'seasons'],
   [/^\/mesta$/, 'spots'],
+  [/^\/ulovi$/, 'feed'],
   [/^\/(privatnost|uslovi)$/, 'legal']
 ];
 const PAGES = {
@@ -50,6 +51,7 @@ const PAGES = {
   profile: () => import('./pages/profile.js'),
   favorites: () => import('./pages/favorites.js'),
   spots: () => import('./pages/spots.js'),
+  feed: () => import('./pages/feed.js'),
   about: () => import('./pages/about.js'),
   seasons: () => import('./pages/seasons.js'),
   legal: () => import('./pages/legal.js')
@@ -100,9 +102,10 @@ function renderNav(active) {
     ['log', '/dnevnik', 'book', t('nav_log')],
     ctx.user ? ['profile', '/profil', 'user', t('nav_profile')] : ['auth', '/prijava', 'user', t('nav_login')]
   ];
-  const isActive = n => n === active || (n === 'home' && active === 'lake') || (n === 'profile' && ['owner', 'lakeEdit', 'admin', 'favorites'].includes(active));
+  const isActive = n => n === active || (n === 'home' && active === 'lake') || (n === 'profile' && ['owner', 'lakeEdit', 'admin', 'favorites', 'spots'].includes(active)) || (n === 'log' && active === 'feed');
   $('#topNav').innerHTML = tabs.map(([n, p, ic, label]) =>
     `<a href="#${p}" class="tn ${isActive(n) ? 'on' : ''}" ${isActive(n) ? 'aria-current="page"' : ''}>${esc(label)}</a>`).join('')
+    + `<a href="#/ulovi" class="tn ${active === 'feed' ? 'on' : ''}">${esc(t('feed_title'))}</a>`
     + `<a href="#/lovostaj" class="tn ${active === 'seasons' ? 'on' : ''}">${esc(t('seasons'))}</a>`
     + `<button class="lang-btn" id="langBtn" aria-label="${esc(t('language'))}">${lang() === 'hu' ? 'SR' : 'HU'}</button>`;
   $('#footer').innerHTML = `<a href="#/o-nama">${esc(t('about'))}</a><a href="#/privatnost">${esc(t('privacy'))}</a><a href="#/uslovi">${esc(t('terms'))}</a><span>© ${new Date().getFullYear()} Ripple</span>`;

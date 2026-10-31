@@ -21,7 +21,8 @@ export async function render(el, _p, ctx) {
     <div id="mine"></div>
     <div id="list">${spinner()}</div>
     <div class="section" id="cotmSec"><h2>${icon('trophy', 22)} ${esc(t('cotm_title'))} · ${esc(fmtMonth(todayStr()))}</h2>
-      <p class="small muted" style="margin-top:-6px">${esc(t('cotm_note'))}</p><div id="cotm">${spinner()}</div></div>
+      <p class="small muted" style="margin-top:-6px">${esc(t('cotm_note'))}</p><div id="cotm">${spinner()}</div>
+      <a class="btn ghost" href="#/ulovi" style="margin-top:12px">${icon('fish', 18)}${esc(t('feed_all'))}</a></div>
   </div>`;
   loadCotm();
 
