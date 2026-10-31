@@ -143,7 +143,16 @@ async function init() {
   })).catch(() => {});
   setTimeout(sync, 2500);
   window.addEventListener('online', sync);
-  if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    // Új verzió élesedésekor egyszer újratöltjük az oldalt, hogy ne keveredjenek a régi és új fájlok
+    const had = !!navigator.serviceWorker.controller;
+    let reloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!had || reloaded || !$('#modal').hidden) return;
+      reloaded = true; location.reload();
+    });
+    navigator.serviceWorker.register('sw.js').then(r => r.update()).catch(() => {});
+  }
 }
 export async function reloadSession() { await loadSession(); }
 init();
