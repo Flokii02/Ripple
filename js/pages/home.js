@@ -64,7 +64,9 @@ export async function render(el, _p, ctx) {
   const getLoc = () => { try { return JSON.parse(localStorage.getItem('ripple_wx_loc') || 'null'); } catch (e) { return null; } };
   const setLoc = l => { try { localStorage.setItem('ripple_wx_loc', JSON.stringify(l)); } catch (e) {} };
   let lakeOpts = [];
+  let wxSeq = 0;
   const drawWx = () => {
+    const my = ++wxSeq;
     const loc = getLoc() || { kind: 'region', lat: REGION[0], lng: REGION[1] };
     const sel = loc.kind === 'lake' ? 'lake:' + loc.id : loc.kind === 'town' ? 'town:' + loc.id : loc.kind;
     const head = `<div class="wx-head"><h2>${esc(t('wx_today'))}</h2>
@@ -76,7 +78,7 @@ export async function render(el, _p, ctx) {
           ${lakeOpts.length ? `<optgroup label="${esc(t('nav_lakes'))}">${lakeOpts.map(l => `<option value="lake:${l.id}" ${sel === 'lake:' + l.id ? 'selected' : ''}>${esc(l.name)}</option>`).join('')}</optgroup>` : ''}
         </select></label></div>`;
     wxBox.innerHTML = head + spinner();
-    renderWeatherCard(wxBox, loc.lat, loc.lng, { head, collapsible: window.innerWidth < 860 }).then(() => bindLoc());
+    renderWeatherCard(wxBox, loc.lat, loc.lng, { head, collapsible: window.innerWidth < 860, isCurrent: () => my === wxSeq && document.body.contains(wxBox) }).then(() => bindLoc());
     bindLoc();
   };
   const bindLoc = () => {
@@ -110,7 +112,14 @@ export async function render(el, _p, ctx) {
   if (error) { $('#list').innerHTML = `<div class="empty">${esc(t('error'))}</div>`; return; }
   LAKES = (data || []).map(l => ({ ...l, photo: (l.lake_photos || []).sort((a, b) => a.sort - b.sort)[0]?.path || null }));
   lakeOpts = LAKES.filter(l => l.lat && l.lng);
-  if (lakeOpts.length) { const s = $('#wxLoc'); if (s && !s.querySelector('option[value^="lake:"]')) drawWx(); }
+  // A tavakat a választóhoz adjuk hozzá újrarajzolás nélkül (hogy ne ugorjon vissza a választás)
+  if (lakeOpts.length) {
+    const s = $('#wxLoc');
+    if (s && !s.querySelector('option[value^="lake:"]')) {
+      s.insertAdjacentHTML('beforeend', `<optgroup label="${esc(t('nav_lakes'))}">${lakeOpts.map(l => `<option value="lake:${l.id}">${esc(l.name)}</option>`).join('')}</optgroup>`);
+      const loc = getLoc(); if (loc?.kind === 'lake') s.value = 'lake:' + loc.id;
+    }
+  }
   let FAVS = new Set();
   if (ctx.user) { const { data: fv } = await sb.from('favorites').select('lake_id').eq('user_id', ctx.user.id); FAVS = new Set((fv || []).map(f => f.lake_id)); }
 

@@ -134,6 +134,8 @@ export function dayName(iso) {
 export async function renderWeatherCard(box, lat, lng, opts = {}) {
   try {
     const w = await lakeWeather(lat, lng);
+    // Ha közben más helyet választottak, ezt a régi választ eldobjuk
+    if (opts.isCurrent && !opts.isCurrent()) return;
     const n = w.now, info = wxInfo(n.weather_code), tr = trendArrow(w.trend);
     const mp = moonPhase();
     let spKey = 'general'; try { spKey = localStorage.getItem('ripple_bite_sp') || 'general'; } catch (e) {}
@@ -182,6 +184,7 @@ export async function renderWeatherCard(box, lat, lng, opts = {}) {
       <div class="small muted" style="margin-top:8px">Open-Meteo</div>`;
   } catch (e) {
     console.error(e);
+    if (opts.isCurrent && !opts.isCurrent()) return;
     box.innerHTML = `${opts.head ?? `<h2>${esc(t('wx_title'))}</h2>`}<p class="muted small">${esc(t('wx_err'))}</p>`;
     return;
   }
