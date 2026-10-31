@@ -8,6 +8,7 @@ const SC = () => window.SunCalc;
 export const BITE_SPECIES = {
   general: { opt: [12, 24], ok: [6, 28], night: 0, dawn: 15, cloud: 0, wind: [4, 22] },
   saran:   { opt: [16, 26], ok: [10, 30], night: 5, dawn: 12, cloud: 0, wind: [3, 18] },
+  karas:   { opt: [14, 26], ok: [8, 30], night: -5, dawn: 12, cloud: 2, wind: [2, 16] },
   amur:    { opt: [18, 28], ok: [13, 31], night: 0, dawn: 10, cloud: -3, wind: [2, 16] },
   som:     { opt: [20, 28], ok: [15, 31], night: 18, dawn: 10, cloud: 5, wind: [0, 18] },
   stuka:   { opt: [6, 16], ok: [2, 22], night: -15, dawn: 15, cloud: 8, wind: [8, 28] },
