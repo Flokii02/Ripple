@@ -135,6 +135,29 @@ async function init() {
     if (ev === 'PASSWORD_RECOVERY') go('/profil');
   });
   window.addEventListener('hashchange', route);
+  // Visszatérés az appba (telefonon háttérből): a régi tartalom / lejárt bejelentkezés helyett frissítünk
+  let hiddenAt = 0, resuming = false;
+  const resume = async () => {
+    if (resuming || !hiddenAt || Date.now() - hiddenAt < 30e3 || !navigator.onLine) return;
+    resuming = true; hiddenAt = 0;
+    try {
+      // a lejárt munkamenet-tokent itt frissíti a Supabase, mielőtt újra lekérdezünk
+      try { await sb.auth.startAutoRefresh?.(); } catch (e) {}
+      await loadSession().catch(() => {});
+      if ($('#modal').hidden) {
+        const y = window.scrollY;
+        await route();
+        if (y) setTimeout(() => window.scrollTo(0, y), 300);
+      }
+    } finally { resuming = false; }
+  };
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') { hiddenAt = hiddenAt || Date.now(); try { sb.auth.stopAutoRefresh?.(); } catch (e) {} }
+    else resume();
+  });
+  window.addEventListener('pageshow', e => { if (e.persisted) { hiddenAt = hiddenAt || Date.now() - 60e3; resume(); } });
+  window.addEventListener('focus', () => resume());
+  window.addEventListener('online', () => { if (!$('#main .loader')) { hiddenAt = hiddenAt || Date.now() - 60e3; resume(); } });
   route();
   // Net nélkül mentett fogások feltöltése indításkor és amikor visszajön a net
   const sync = () => ctx.user && import('./offline.js').then(m => m.flushQueue(ctx, n => {
