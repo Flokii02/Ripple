@@ -10,7 +10,30 @@ const TTL = 30 * 60 * 1000;
 function cacheGet(k) {
   try { const v = JSON.parse(sessionStorage.getItem(k) || 'null'); return v && Date.now() - v.at < TTL ? v.data : null; } catch (e) { return null; }
 }
-function cacheSet(k, data) { try { sessionStorage.setItem(k, JSON.stringify({ at: Date.now(), data })); } catch (e) {} }
+function cacheSet(k, data) {
+  try { sessionStorage.setItem(k, JSON.stringify({ at: Date.now(), data })); } catch (e) {}
+  try { localStorage.setItem('wxs:' + k, JSON.stringify({ at: Date.now(), data })); } catch (e) {}
+}
+// Tartalék: ha a szolgáltatás épp nem elérhető, a legutóbbi (max. 12 órás) adat
+function staleGet(k) {
+  try { const v = JSON.parse(localStorage.getItem('wxs:' + k) || 'null'); return v && Date.now() - v.at < 12 * 3600e3 ? v.data : null; } catch (e) { return null; }
+}
+// Lekérés időkorláttal és újrapróbálással (telefonon visszatéréskor a net néha csak pár mp múlva él)
+async function getJSON(u, tries = 3) {
+  let last;
+  for (let a = 0; a < tries; a++) {
+    if (a) await new Promise(r => setTimeout(r, a * 1500));
+    const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 10000);
+    try {
+      const r = await fetch(u, { signal: ctl.signal, cache: 'no-store' });
+      if (r.status === 400) throw Object.assign(new Error('weather 400: ' + (await r.text()).slice(0, 200)), { fatal: true });
+      if (!r.ok) throw new Error('weather ' + r.status);
+      return await r.json();
+    } catch (e) { last = e; console.warn('wx', e); if (e.fatal) break; }
+    finally { clearTimeout(to); }
+  }
+  throw last;
+}
 
 // Egy tó részletes időjárása
 export async function lakeWeather(lat, lng) {
@@ -20,9 +43,9 @@ export async function lakeWeather(lat, lng) {
     + '&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,surface_pressure,precipitation,cloud_cover'
     + '&hourly=temperature_2m,surface_pressure,wind_speed_10m,cloud_cover,weather_code'
     + '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max,sunrise,sunset';
-  const r = await fetch(u);
-  if (!r.ok) throw new Error('weather');
-  const d = await r.json();
+  let d;
+  try { d = await getJSON(u); }
+  catch (e) { const st = staleGet(key); if (st) return st; throw e; }
   const out = {
     now: d.current,
     hourly: d.hourly,
@@ -46,9 +69,9 @@ export async function listWeather(points) {
   const hit = cacheGet(key); if (hit) return hit;
   const u = `${API}?latitude=${pts.map(p => p.lat).join(',')}&longitude=${pts.map(p => p.lng).join(',')}`
     + '&timezone=Europe%2FBelgrade&current=temperature_2m,weather_code,surface_pressure&hourly=surface_pressure&past_days=1&forecast_days=1';
-  const r = await fetch(u);
-  if (!r.ok) throw new Error('weather');
-  let d = await r.json();
+  let d;
+  try { d = await getJSON(u, 2); }
+  catch (e) { const st = staleGet(key); if (st) return st; throw e; }
   if (!Array.isArray(d)) d = [d];
   const out = {};
   pts.forEach((p, i) => { const x = d[i]; if (x?.current) out[p.id] = { temp: x.current.temperature_2m, code: x.current.weather_code, trend: pressureTrend(x.hourly, x.current.time) }; });
@@ -185,7 +208,9 @@ export async function renderWeatherCard(box, lat, lng, opts = {}) {
   } catch (e) {
     console.error(e);
     if (opts.isCurrent && !opts.isCurrent()) return;
-    box.innerHTML = `${opts.head ?? `<h2>${esc(t('wx_title'))}</h2>`}<p class="muted small">${esc(t('wx_err'))}</p>`;
+    box.innerHTML = `${opts.head ?? `<h2>${esc(t('wx_title'))}</h2>`}<p class="muted small">${esc(t('wx_err'))}</p>
+      <button class="btn ghost sm wx-retry" type="button">${esc(t('retry'))}</button>`;
+    box.querySelector('.wx-retry').onclick = () => { box.innerHTML = (opts.head ?? '') + '<div class="spinner" style="margin:20px auto"></div>'; renderWeatherCard(box, lat, lng, opts).then(() => opts.onDone?.()); };
     return;
   }
   box.querySelectorAll('[data-bsp]').forEach(b => b.onclick = () => {
