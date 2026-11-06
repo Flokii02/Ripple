@@ -33,7 +33,7 @@ export async function render(el, _p, ctx) {
       $('#aErr').textContent = '';
       const { error } = await sb.auth.signInWithPassword({ email: $('#aEmail').value.trim(), password: $('#aPw').value });
       if (error) { $('#aErr').textContent = /confirm/i.test(error.message) ? t('check_email') : t('bad_login'); return; }
-      toast(t('welcome')); go('/');
+      toast(t('welcome')); { let back = null; try { back = sessionStorage.getItem('ripple_after_login'); sessionStorage.removeItem('ripple_after_login'); } catch (e) {} if (back && back.startsWith('#/')) location.hash = back.slice(1); else go('/'); }
     };
     $('#aGo').onclick = submit;
     $('#aPw').onkeydown = e => { if (e.key === 'Enter') submit(); };

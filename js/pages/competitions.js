@@ -4,6 +4,7 @@ import { catchPhotoUrls } from '../ui.js';
 import { speciesName } from '../i18n.js';
 import { $, $$, esc, icon, fmtDate, fmtMonth, fmtMoney, todayStr, openModal, closeModal, toast, spinner, share, shareUrl, errText } from '../ui.js';
 import { go } from '../app.js';
+import { stageChip } from './comp.js';
 
 let mode = 'upcoming';
 
@@ -40,7 +41,7 @@ export async function render(el, _p, ctx) {
       html += compCard(c);
     });
     $('#list').innerHTML = html;
-    $$('[data-sharecomp]').forEach(b => b.onclick = () => { const [title, d] = b.dataset.sharecomp.split('|'); share({ title, text: `${title} – ${fmtDate(d)} | Ripple`, url: shareUrl('takmicenja') }); });
+    $$('[data-sharecomp]').forEach(b => b.onclick = () => { const [id, title, d] = b.dataset.sharecomp.split('|'); share({ title, text: `${title} – ${fmtDate(d)} | Ripple`, url: shareUrl('takmicenje=' + id) }); });
   };
 
   // A saját, még jóváhagyásra váró versenyek
@@ -61,12 +62,14 @@ function compCard(c, mine = false) {
   return `<div class="comp-card">
     <div class="date-badge"><b>${d.getDate()}</b><small>${esc(fmtMonth(c.date_start).split(' ')[0].slice(0, 3))}</small></div>
     <div class="cbody">
-      <h3>${esc(c.title)}</h3>
+      <h3><a href="#/takmicenje/${c.id}">${esc(c.title)}</a></h3>
       <div class="small muted">${esc(fmtDate(c.date_start))}${c.date_end && c.date_end !== c.date_start ? ' – ' + esc(fmtDate(c.date_end)) : ''}${where ? ' · ' + where : ''}</div>
-      <div class="row" style="margin-top:6px">${c.entry_fee ? `<span class="chip sand">${esc(fmtMoney(c.entry_fee))}</span>` : ''}${mine ? `<span class="chip ${c.status === 'rejected' ? 'bad' : 'warn'}">${esc(t(c.status))}</span>` : ''}</div>
+      <div class="row" style="margin-top:6px;flex-wrap:wrap;gap:6px">${c.stage && c.stage !== 'setup' ? stageChip(c.stage) : ''}${c.entry_fee ? `<span class="chip sand">${esc(fmtMoney(c.entry_fee))}</span>` : ''}${mine ? `<span class="chip ${c.status === 'rejected' ? 'bad' : 'warn'}">${esc(t(c.status))}</span>` : ''}</div>
       ${c.description ? `<p>${esc(c.description)}</p>` : ''}
       ${c.contact ? `<p>${icon('phone', 14)} ${esc(c.contact)}</p>` : ''}
-      ${mine ? '' : `<button class="btn ghost sm" style="margin-top:8px" data-sharecomp="${esc(c.title)}|${esc(c.date_start)}">${icon('share', 15)}${esc(t('share'))}</button>`}
+      <div class="row" style="margin-top:8px;gap:8px;flex-wrap:wrap">
+        <a class="btn ${c.stage === 'registration' || c.stage === 'live' ? 'lake' : 'ghost'} sm" href="#/takmicenje/${c.id}${mine ? '/vodjenje' : ''}">${esc(mine ? t('cm_manage') : c.stage === 'registration' ? t('reg_title') : c.stage === 'live' ? t('cr_live_btn') : t('cr_details'))}</a>
+        ${mine ? '' : `<button class="btn ghost sm" data-sharecomp="${c.id}|${esc(c.title)}|${esc(c.date_start)}">${icon('share', 15)}${esc(t('share'))}</button>`}</div>
     </div></div>`;
 }
 
@@ -97,14 +100,15 @@ export async function openCompForm(ctx, presetLakeId, done) {
     if (end && end < start) { $('#cErr', body).textContent = t('date_end'); return; }
     const fee = $('#cFee', body).value;
     $('#cSave', body).disabled = true;
-    const { error } = await sb.from('competitions').insert({
+    const { data: made, error } = await sb.from('competitions').insert({
       title, date_start: start, date_end: end, lake_id: lakeId ? Number(lakeId) : null, place: place || null,
       entry_fee: fee === '' ? null : Math.max(0, parseInt(fee, 10) || 0),
       contact: $('#cContact', body).value.trim() || null, description: $('#cDesc', body).value.trim() || null
-    });
+    }).select('id').single();
     $('#cSave', body).disabled = false;
     if (error) { console.error(error); $('#cErr', body).textContent = errText(error); return; }
-    closeModal(); toast(t('pending_note')); done && done();
+    closeModal(); toast(t('pending_note'));
+    if (made?.id) go('/takmicenje/' + made.id + '/vodjenje'); else done && done();
   };
 }
 

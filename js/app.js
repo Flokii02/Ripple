@@ -26,6 +26,8 @@ const ROUTES = [
   [/^\/?$/, 'home'],
   [/^\/jezero\/([a-z0-9-]+)$/, 'lake'],
   [/^\/takmicenja$/, 'competitions'],
+  [/^\/takmicenje\/(\d+)\/vodjenje$/, 'compManage'],
+  [/^\/takmicenje\/(\d+)(?:\/(tv))?$/, 'comp'],
   [/^\/dnevnik$/, 'log'],
   [/^\/moja-jezera$/, 'owner'],
   [/^\/moja-jezera\/(novo|\d+)$/, 'lakeEdit'],
@@ -52,6 +54,8 @@ const PAGES = {
   favorites: () => import('./pages/favorites.js'),
   spots: () => import('./pages/spots.js'),
   feed: () => import('./pages/feed.js'),
+  comp: () => import('./pages/comp.js'),
+  compManage: () => import('./pages/compManage.js'),
   about: () => import('./pages/about.js'),
   seasons: () => import('./pages/seasons.js'),
   legal: () => import('./pages/legal.js')
@@ -102,7 +106,7 @@ function renderNav(active) {
     ['log', '/dnevnik', 'book', t('nav_log')],
     ctx.user ? ['profile', '/profil', 'user', t('nav_profile')] : ['auth', '/prijava', 'user', t('nav_login')]
   ];
-  const isActive = n => n === active || (n === 'home' && active === 'lake') || (n === 'profile' && ['owner', 'lakeEdit', 'admin', 'favorites', 'spots'].includes(active)) || (n === 'log' && active === 'feed');
+  const isActive = n => n === active || (n === 'home' && active === 'lake') || (n === 'profile' && ['owner', 'lakeEdit', 'admin', 'favorites', 'spots'].includes(active)) || (n === 'log' && active === 'feed') || (n === 'competitions' && ['comp', 'compManage'].includes(active));
   $('#topNav').innerHTML = tabs.map(([n, p, ic, label]) =>
     `<a href="#${p}" class="tn ${isActive(n) ? 'on' : ''}" ${isActive(n) ? 'aria-current="page"' : ''}>${esc(label)}</a>`).join('')
     + `<a href="#/ulovi" class="tn ${active === 'feed' ? 'on' : ''}">${esc(t('feed_title'))}</a>`
@@ -128,6 +132,7 @@ async function init() {
   // Megosztott linkek: ?jezero=<slug> vagy ?takmicenja -> belső oldal
   const qs = new URLSearchParams(location.search);
   if (qs.get('jezero') && /^[a-z0-9-]+$/.test(qs.get('jezero'))) { history.replaceState(null, '', location.pathname + '#/jezero/' + qs.get('jezero')); }
+  else if (/^\d+$/.test(qs.get('takmicenje') || '')) { history.replaceState(null, '', location.pathname + '#/takmicenje/' + qs.get('takmicenje')); }
   else if (qs.has('takmicenja')) { history.replaceState(null, '', location.pathname + '#/takmicenja'); }
   await loadSession();
   sb.auth.onAuthStateChange(async (ev) => {
