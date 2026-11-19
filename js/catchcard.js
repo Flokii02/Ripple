@@ -87,7 +87,7 @@ export async function catchCardBlob(c, photoUrl, waterName) {
   drawBobber(g, 96, 1282, 1.1);
   g.fillStyle = '#fff'; g.font = '700 48px Outfit, system-ui, sans-serif'; g.fillText('Ripple', 140, 1298);
   g.font = '500 30px Inter, system-ui, sans-serif'; g.fillStyle = 'rgba(255,255,255,.7)';
-  const u = 'flokii02.github.io/Ripple'; g.fillText(u, W - 60 - g.measureText(u).width, 1294);
+  const u = 'rippleribolov.rs'; g.fillText(u, W - 60 - g.measureText(u).width, 1294);
   return new Promise(res => cv.toBlob(res, 'image/jpeg', 0.9));
 }
 
