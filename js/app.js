@@ -107,10 +107,11 @@ function renderNav(active) {
     ctx.user ? ['profile', '/profil', 'user', t('nav_profile')] : ['auth', '/prijava', 'user', t('nav_login')]
   ];
   const isActive = n => n === active || (n === 'home' && active === 'lake') || (n === 'profile' && ['owner', 'lakeEdit', 'admin', 'favorites', 'spots'].includes(active)) || (n === 'log' && active === 'feed') || (n === 'competitions' && ['comp', 'compManage'].includes(active));
-  $('#topNav').innerHTML = tabs.map(([n, p, ic, label]) =>
-    `<a href="#${p}" class="tn ${isActive(n) ? 'on' : ''}" ${isActive(n) ? 'aria-current="page"' : ''}>${esc(label)}</a>`).join('')
-    + `<a href="#/ulovi" class="tn ${active === 'feed' ? 'on' : ''}">${esc(t('feed_title'))}</a>`
-    + `<a href="#/lovostaj" class="tn ${active === 'seasons' ? 'on' : ''}">${esc(t('seasons'))}</a>`
+  // Gépen: Tavak · Versenyek · Fogások · Napló · Tilalmi idők … Profil (jobbra)
+  const top = [tabs[0], tabs[1], ['feed', '/ulovi', '', t('feed_title')], tabs[2], ['seasons', '/lovostaj', '', t('seasons')], tabs[3]];
+  const topActive = n => n === 'log' ? active === 'log' : isActive(n);
+  $('#topNav').innerHTML = top.map(([n, p, ic, label]) =>
+    `<a href="#${p}" class="tn ${n === 'profile' || n === 'auth' ? 'tn-me' : ''} ${topActive(n) ? 'on' : ''}" ${topActive(n) ? 'aria-current="page"' : ''}>${esc(label)}</a>`).join('')
     + `<button class="lang-btn" id="langBtn" aria-label="${esc(t('language'))}">${lang() === 'hu' ? 'SR' : 'HU'}</button>`;
   $('#footer').innerHTML = `<a href="#/o-nama">${esc(t('about'))}</a><a href="#/privatnost">${esc(t('privacy'))}</a><a href="#/uslovi">${esc(t('terms'))}</a><span>© ${new Date().getFullYear()} Ripple</span>`;
   $('#tabBar').innerHTML = tabs.map(([n, p, ic, label]) =>

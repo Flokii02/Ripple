@@ -326,14 +326,20 @@ input[type=search] { -webkit-appearance: none; appearance: none; }
 .wx-loc select { min-height: 40px; max-width: 220px; border-radius: 999px; border: 1px solid var(--line); background: #fff; padding: 6px 30px 6px 12px; font-weight: 600; font-size: 14px; color: var(--ink); -webkit-appearance: none; appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--mute) 50%), linear-gradient(135deg, var(--mute) 50%, transparent 50%); background-position: calc(100% - 15px) 50%, calc(100% - 10px) 50%; background-size: 5px 5px; background-repeat: no-repeat; text-overflow: ellipsis; }
 .wx-wide { margin-bottom: 18px; }
 @media (min-width: 960px) {
-  .wx-wide { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.3fr); grid-template-areas: "head head head" "now grid days" "bite grid days" "src src src"; gap: 0 18px; align-items: start; }
-  .wx-wide > .wx-head { grid-area: head; }
-  .wx-wide > .wx-now { grid-area: now; }
-  .wx-wide > .bite { grid-area: bite; margin-bottom: 0; }
+  /* Gépen két oszlop: bal oldalt a mostani idő és a kapás, jobbra az 5 napos előrejelzés és az adatok */
+  .wx-wide { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); grid-template-areas: "head head" "now days" "bite grid" "src src"; gap: 14px 24px; align-items: start; }
+  .wx-wide > .wx-head { grid-area: head; margin-bottom: 0; }
+  .wx-wide > .wx-now { grid-area: now; align-self: center; margin: 0; }
+  .wx-wide > .bite { grid-area: bite; margin: 0; }
   .wx-wide > .wx-grid { grid-area: grid; }
+  .wx-wide > .wx-grid > div:last-child:nth-child(odd) { grid-column: 1 / -1; }
   .wx-wide > .wx-days { grid-area: days; margin-top: 0; }
   .wx-wide > .small { grid-area: src; }
-  .wx-wide > .spinner, .wx-wide > p { grid-column: 1 / -1; }
+  .wx-wide > .spinner, .wx-wide > p, .wx-wide > .wx-retry { grid-column: 1 / -1; }
+}
+@media (min-width: 860px) {
+  .topnav .tn-me { margin-left: 10px; border: 1px solid var(--line); }
+  .topnav .tn-me.on { border-color: var(--ink); }
 }
 
 /* Statisztika, átkérés, lábléc */
@@ -648,3 +654,14 @@ body.tv-mode { background: #0E2A3B; }
 }
 .res-row.head span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .stage-steps button { min-width: 74px; }
+
+/* --- Gépen: szélesebb elrendezések --- */
+.page.comp-wide { max-width: 720px; }
+@media (min-width: 1000px) {
+  .page.comp-wide { max-width: 1180px; }
+  .comp-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(320px, 1fr); gap: 28px; align-items: start; }
+  .comp-layout > #cotmSec { margin-top: 0; position: sticky; top: 84px; background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; box-shadow: var(--shadow); }
+  .comp-layout > #cotmSec h2 { font-size: 19px; }
+  .home-map { max-height: 680px; }
+  .spot-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+}

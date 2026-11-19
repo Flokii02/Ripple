@@ -1,5 +1,5 @@
 import { sb } from '../config.js';
-import { t } from '../i18n.js';
+import { lang, t } from '../i18n.js';
 import { catchPhotoUrls } from '../ui.js';
 import { speciesName } from '../i18n.js';
 import { $, $$, esc, icon, fmtDate, fmtMonth, fmtMoney, todayStr, openModal, closeModal, toast, spinner, share, shareUrl, errText } from '../ui.js';
@@ -10,7 +10,7 @@ let mode = 'upcoming';
 
 export async function render(el, _p, ctx) {
   el.innerHTML = `
-  <div class="page narrow">
+  <div class="page comp-wide">
     <div class="page-head">
       <div><h1>${esc(t('comp_title'))}</h1></div>
       <button class="btn lake" id="addComp">${icon('plus', 18)}${esc(t('comp_add'))}</button>
@@ -19,11 +19,12 @@ export async function render(el, _p, ctx) {
       <button id="tUp" class="${mode === 'upcoming' ? 'on' : ''}">${esc(t('comp_upcoming'))}</button>
       <button id="tPast" class="${mode === 'past' ? 'on' : ''}">${esc(t('comp_past'))}</button>
     </div>
+    <div class="comp-layout"><div class="comp-main">
     <div id="mine"></div>
-    <div id="list">${spinner()}</div>
-    <div class="section" id="cotmSec"><h2>${icon('trophy', 22)} ${esc(t('cotm_title'))} · ${esc(fmtMonth(todayStr()))}</h2>
+    <div id="list">${spinner()}</div></div>
+    <aside class="section" id="cotmSec"><h2>${icon('trophy', 22)} ${esc(t('cotm_title'))} · ${esc(fmtMonth(todayStr()))}</h2>
       <p class="small muted" style="margin-top:-6px">${esc(t('cotm_note'))}</p><div id="cotm">${spinner()}</div>
-      <a class="btn ghost" href="#/ulovi" style="margin-top:12px">${icon('fish', 18)}${esc(t('feed_all'))}</a></div>
+      <a class="btn ghost" href="#/ulovi" style="margin-top:12px">${icon('fish', 18)}${esc(t('feed_all'))}</a></aside></div>
   </div>`;
   loadCotm();
 
@@ -60,7 +61,7 @@ function compCard(c, mine = false) {
   const d = new Date(c.date_start + 'T12:00');
   const where = c.lakes ? `<a href="#/jezero/${esc(c.lakes.slug)}">${esc(c.lakes.name)}</a>${c.lakes.place ? ', ' + esc(c.lakes.place) : ''}` : esc(c.place || '');
   return `<div class="comp-card">
-    <div class="date-badge"><b>${d.getDate()}</b><small>${esc(fmtMonth(c.date_start).split(' ')[0].slice(0, 3))}</small></div>
+    <div class="date-badge"><b>${d.getDate()}</b><small>${esc(d.toLocaleDateString(lang() === 'hu' ? 'hu-HU' : 'sr-Latn-RS', { month: 'short' }).replace(/\.$/, ''))}</small></div>
     <div class="cbody">
       <h3><a href="#/takmicenje/${c.id}">${esc(c.title)}</a></h3>
       <div class="small muted">${esc(fmtDate(c.date_start))}${c.date_end && c.date_end !== c.date_start ? ' – ' + esc(fmtDate(c.date_end)) : ''}${where ? ' · ' + where : ''}</div>
