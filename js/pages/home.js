@@ -25,7 +25,12 @@ export async function render(el, _p, ctx) {
         <path class="reed d3" d="M64 160 C 62 125 66 100 72 60" stroke-width="2.5"/><path class="reed d2" d="M150 160 C 152 120 148 95 156 50" stroke-width="3"/>
         <path class="reed" d="M168 160 C 166 130 170 110 176 80" stroke-width="2.5"/></g>
         <g fill="#7A5A2E"><rect class="reed" x="32" y="18" width="7" height="26" rx="3.5"/><rect class="reed d2" x="46" y="44" width="7" height="22" rx="3.5"/><rect class="reed d2" x="152" y="48" width="7" height="24" rx="3.5"/></g></svg>
-      <svg class="lh-fish" viewBox="0 0 60 24" aria-hidden="true"><path d="M2 12c8-10 26-10 36 0-10 10-28 10-36 0Z M38 12l14-8v16Z" fill="currentColor"/></svg>
+      <div class="lh-rays" aria-hidden="true"></div>
+      <div class="lh-fish f1" aria-hidden="true"><svg viewBox="0 0 80 36"><g class="tail"><path d="M19 18 3 6c3 6 3 18 0 24Z"/></g><path d="M34 10c5-7 16-7 21 0Z"/><path d="M17 18C25 7 50 4 64 12c5 3 9 5 10 6-1 1-5 3-10 6-14 8-39 5-47-6Z"/><path class="fin" d="M40 24c3 5 8 6 11 4l-3-5Z"/><circle cx="66" cy="16.5" r="1.7" fill="#0E2A3B" opacity=".6"/></svg></div>
+      <div class="lh-fish f2" aria-hidden="true"><svg viewBox="0 0 80 36"><g class="tail"><path d="M19 18 3 6c3 6 3 18 0 24Z"/></g><path d="M34 10c5-7 16-7 21 0Z"/><path d="M17 18C25 7 50 4 64 12c5 3 9 5 10 6-1 1-5 3-10 6-14 8-39 5-47-6Z"/><path class="fin" d="M40 24c3 5 8 6 11 4l-3-5Z"/><circle cx="66" cy="16.5" r="1.7" fill="#0E2A3B" opacity=".6"/></svg></div>
+      <div class="lh-fish f3" aria-hidden="true"><svg viewBox="0 0 80 36"><g class="tail"><path d="M19 18 3 6c3 6 3 18 0 24Z"/></g><path d="M34 10c5-7 16-7 21 0Z"/><path d="M17 18C25 7 50 4 64 12c5 3 9 5 10 6-1 1-5 3-10 6-14 8-39 5-47-6Z"/><path class="fin" d="M40 24c3 5 8 6 11 4l-3-5Z"/><circle cx="66" cy="16.5" r="1.7" fill="#0E2A3B" opacity=".6"/></svg></div>
+      <div class="lh-bubbles" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="lh-bob" aria-hidden="true"><span class="ring"></span><span class="ring r2"></span><svg viewBox="0 0 64 64"><line x1="32" y1="4" x2="32" y2="15" stroke="#fff" stroke-width="3" stroke-linecap="round"/><path d="M23 28A9 13 0 0 1 41 28Z" fill="#E2A73E"/><path d="M23 28A9 13 0 0 0 41 28Z" fill="#fff"/></svg></div>
       <svg class="lh-waves" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
         <path class="w1" d="M0 40 C 240 0 480 80 720 40 S 1200 0 1440 40 V90 H0Z"/>
         <path class="w2" d="M0 60 C 240 20 480 100 720 60 S 1200 20 1440 60 V90 H0Z"/>

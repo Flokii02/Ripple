@@ -389,12 +389,48 @@ body { background: var(--bg) linear-gradient(180deg, #E7EFF1 0, var(--bg) 340px)
 .lh-reeds { position: absolute; right: -10px; bottom: 10px; width: 170px; height: 140px; stroke: #5E9C78; z-index: 1; opacity: .85; }
 .lh-reeds .reed { transform-origin: bottom center; transform-box: fill-box; animation: sway 4s ease-in-out infinite; }
 .lh-reeds .reed.d2 { animation-duration: 5s; animation-delay: -1s; } .lh-reeds .reed.d3 { animation-duration: 4.5s; animation-delay: -2s; }
-.lh-fish { position: absolute; bottom: 30px; left: -60px; width: 46px; color: rgba(255, 255, 255, .22); z-index: 1; animation: swim 14s linear infinite; }
-.lh-waves { position: absolute; left: 0; bottom: 0; width: 200%; height: 70px; z-index: 1; animation: waveSlide 12s linear infinite; }
+.lh-waves { position: absolute; left: 0; bottom: 0; width: 200%; height: 70px; z-index: 2; animation: waveSlide 12s linear infinite; pointer-events: none; }
+/* --- Élő tó: halak, buborékok, úszó, fénysávok --- */
+.lake-hero { container-type: inline-size; }
+.lh-rays { position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: .5; mix-blend-mode: soft-light;
+  background: repeating-linear-gradient(115deg, rgba(255,255,255,0) 0 60px, rgba(255,255,255,.18) 60px 90px, rgba(255,255,255,0) 90px 170px);
+  mask-image: linear-gradient(180deg, #000 0%, transparent 85%); -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 85%);
+  animation: rays 16s ease-in-out infinite alternate; }
+@keyframes rays { from { transform: translateX(-30px); opacity: .35; } to { transform: translateX(30px); opacity: .6; } }
+.lh-fish { position: absolute; left: 0; z-index: 1; width: 52px; color: rgba(255, 255, 255, .26); will-change: transform; animation: swimR 22s linear infinite; }
+.lh-fish svg { display: block; width: 100%; fill: currentColor; animation: fishBob 2.4s ease-in-out infinite; }
+.lh-fish .tail { transform-box: fill-box; transform-origin: 100% 50%; animation: tailWag .45s ease-in-out infinite alternate; }
+.lh-fish .fin { transform-box: fill-box; transform-origin: 0 0; animation: tailWag .9s ease-in-out infinite alternate; }
+.lh-fish.f1 { bottom: 14px; }
+.lh-fish.f2 { bottom: 30px; width: 34px; color: rgba(255, 255, 255, .16); animation-name: swimL; animation-duration: 30s; animation-delay: -9s; }
+.lh-fish.f2 svg { transform: scaleX(-1); animation-name: fishBobL; }
+.lh-fish.f3 { bottom: 6px; width: 70px; color: rgba(14, 42, 59, .45); animation-duration: 38s; animation-delay: -24s; }
+.lh-fish.f3 .tail { animation-duration: .7s; }
+@keyframes swimR { 0% { transform: translateX(-90px); } 100% { transform: translateX(calc(100cqw + 90px)); } }
+@keyframes swimL { 0% { transform: translateX(calc(100cqw + 90px)); } 100% { transform: translateX(-90px); } }
+@keyframes fishBob { 0%, 100% { transform: translateY(0) rotate(0deg); } 25% { transform: translateY(-3px) rotate(-3deg); } 75% { transform: translateY(2px) rotate(2deg); } }
+@keyframes fishBobL { 0%, 100% { transform: scaleX(-1) translateY(0) rotate(0deg); } 25% { transform: scaleX(-1) translateY(-3px) rotate(-3deg); } 75% { transform: scaleX(-1) translateY(2px) rotate(2deg); } }
+@keyframes tailWag { from { transform: rotate(-14deg); } to { transform: rotate(14deg); } }
+.lh-bubbles { position: absolute; inset: auto 0 0 0; height: 70px; z-index: 1; pointer-events: none; }
+.lh-bubbles i { position: absolute; bottom: 4px; width: 6px; height: 6px; border-radius: 50%; border: 1.5px solid rgba(255, 255, 255, .5); opacity: 0; animation: bubble 6s ease-in infinite; }
+.lh-bubbles i:nth-child(1) { left: 18%; animation-delay: .5s; } .lh-bubbles i:nth-child(2) { left: 21%; width: 4px; height: 4px; animation-delay: 1.4s; }
+.lh-bubbles i:nth-child(3) { left: 47%; animation-delay: 3s; animation-duration: 7s; } .lh-bubbles i:nth-child(4) { left: 49%; width: 4px; height: 4px; animation-delay: 3.8s; animation-duration: 7s; }
+.lh-bubbles i:nth-child(5) { left: 81%; width: 5px; height: 5px; animation-delay: 2s; animation-duration: 8s; }
+@keyframes bubble { 0% { transform: translate(0, 0); opacity: 0; } 15% { opacity: .9; } 60% { transform: translate(4px, -36px); opacity: .7; } 100% { transform: translate(-2px, -60px); opacity: 0; } }
+/* Úszó: lágyan ringatózik, kb. 11 mp-enként „kapás”: kétszer lebukik, gyűrűk terjednek */
+.lh-bob { position: absolute; z-index: 3; bottom: 22px; left: 44%; width: 36px; height: 36px; pointer-events: none; }
+.lh-bob svg { position: relative; z-index: 1; width: 100%; height: 100%; transform-origin: 50% 70%; animation: bobBite 11s ease-in-out infinite; }
+.lh-bob .ring { position: absolute; left: 50%; top: 70%; width: 40px; height: 8px; margin: -4px 0 0 -20px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .55); opacity: 0; animation: bobRing 11s ease-out infinite; }
+.lh-bob .ring.r2 { animation-delay: .35s; }
+@keyframes bobBite {
+  0%, 100% { transform: translateY(0) rotate(0); } 10% { transform: translateY(-2px) rotate(-4deg); } 20% { transform: translateY(1px) rotate(3deg); }
+  30% { transform: translateY(-1px) rotate(-2deg); } 40% { transform: translateY(0) rotate(0); }
+  62% { transform: translateY(0) rotate(0); } 64% { transform: translateY(5px) rotate(5deg); } 66% { transform: translateY(-1px); }
+  68% { transform: translateY(12px) rotate(-6deg); } 72% { transform: translateY(-3px) rotate(3deg); } 78% { transform: translateY(1px) rotate(-1deg); } 84% { transform: translateY(0) rotate(0); } }
+@keyframes bobRing { 0%, 63% { transform: scale(.4, .5); opacity: 0; } 65% { opacity: .9; } 88% { transform: scale(2.8, 1.5); opacity: 0; } 100% { transform: scale(2.8, 1.5); opacity: 0; } }
 .lh-waves .w1 { fill: rgba(255, 255, 255, .07); } .lh-waves .w2 { fill: rgba(255, 255, 255, .12); }
 @keyframes sway { 0%, 100% { transform: rotate(-2.5deg); } 50% { transform: rotate(2.5deg); } }
-@keyframes swim { 0% { transform: translateX(0) translateY(0); } 50% { transform: translateX(55vw) translateY(-6px); } 100% { transform: translateX(110vw) translateY(0); } }
-@media (min-width: 860px) { .lake-hero { padding: 38px 40px 64px; } .lake-hero h1 { font-size: 44px; } .lh-reeds { width: 230px; height: 190px; right: 30px; } }
+@media (min-width: 860px) { .lh-bob { left: 60%; bottom: 26px; width: 42px; height: 42px; } .lh-fish.f1 { width: 62px; } .lh-fish.f3 { width: 84px; } .lake-hero { padding: 38px 40px 64px; } .lake-hero h1 { font-size: 44px; } .lh-reeds { width: 230px; height: 190px; right: 30px; } }
 
 /* Oldalcímek alatti hullámvonal */
 .page-head h1::after, .section > h2::after { content: ''; display: block; width: 44px; height: 8px; margin-top: 6px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 8'%3E%3Cpath d='M0 4c4-4 7-4 11 0s7 4 11 0 7-4 11 0 7 4 11 0' fill='none' stroke='%231F7A8C' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat; }
@@ -432,7 +468,8 @@ body { background: var(--bg) linear-gradient(180deg, #E7EFF1 0, var(--bg) 340px)
 /* Mozgáscsökkentés tisztelete */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
-  .splash-waves, .lh-waves, .lh-fish { animation: none !important; }
+  .splash-waves, .lh-waves, .lh-fish, .lh-fish *, .lh-rays, .lh-bubbles i, .lh-bob *, .lh-reeds .reed { animation: none !important; }
+  .lh-bubbles, .lh-bob .ring { display: none; } .lh-fish.f1 { transform: translateX(40px); } .lh-fish.f2 { transform: translateX(60cqw); } .lh-fish.f3 { display: none; }
 }
 
 /* Összecsukható időjárás (telefon) */
