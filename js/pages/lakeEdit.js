@@ -1,6 +1,6 @@
 import { sb, MAP_CENTER, MAP_ZOOM } from '../config.js';
 import { t, SPECIES, speciesName } from '../i18n.js';
-import { $, $$, esc, icon, toast, slugify, lakePhotoUrl, compressImage, makeThumb, randomName, fmtDate, todayStr, errText } from '../ui.js';
+import { $, $$, esc, icon, toast, slugify, lakePhotoUrl, compressImage, makeThumb, randomName, imgType, fmtDate, todayStr, errText } from '../ui.js';
 import { go } from '../app.js';
 import { openCompForm } from './competitions.js';
 import { isOwner, openSuggest, ownersOnlyHTML } from '../suggest.js';
@@ -185,11 +185,10 @@ export async function render(el, [idParam], ctx) {
       try {
         const blob = await compressImage(f);
         const thumb = await makeThumb(f);
-        const name = randomName();
-        const path = `${lake.id}/${name}`, thumb_path = `${lake.id}/t_${name}`;
-        const up = await sb.storage.from('lake-photos').upload(path, blob, { contentType: 'image/jpeg' });
+        const path = `${lake.id}/${randomName(blob)}`, thumb_path = `${lake.id}/t_${randomName(thumb)}`;
+        const up = await sb.storage.from('lake-photos').upload(path, blob, { contentType: imgType(blob) });
         if (up.error) throw up.error;
-        await sb.storage.from('lake-photos').upload(thumb_path, thumb, { contentType: 'image/jpeg' });
+        await sb.storage.from('lake-photos').upload(thumb_path, thumb, { contentType: imgType(thumb) });
         const ins = await sb.from('lake_photos').insert({ lake_id: lake.id, path, thumb_path, sort: sort++ });
         if (ins.error) { await sb.storage.from('lake-photos').remove([path, thumb_path]); throw ins.error; }
       } catch (err) { console.error(err); toast(String(err.message || '').includes('photo_limit') ? t('photo_limit') : t('error'), 'err'); break; }

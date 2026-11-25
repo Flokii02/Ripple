@@ -198,8 +198,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .catch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
 @media (min-width: 700px) { .catch-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); } }
 .catch-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; }
-.catch-card .ph { aspect-ratio: 4 / 3; background: var(--lake-l); display: flex; align-items: center; justify-content: center; color: var(--lake); }
-.catch-card .ph img { width: 100%; height: 100%; object-fit: cover; }
+.catch-card .ph { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: var(--lake-l); display: flex; align-items: center; justify-content: center; color: var(--lake); }
+.catch-card .ph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 .catch-card .cb { padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; flex-grow: 1; }
 .catch-card .cb h3 { display: flex; justify-content: space-between; gap: 8px; }
 .catch-card .cb .w { font: 600 17px var(--display); color: var(--lake-d); white-space: nowrap; }

@@ -65,7 +65,14 @@ export async function catchPhotoUrls(paths) {
 }
 
 // Telefonos fotók kicsinyítése feltöltés előtt (max 1600 px, JPEG)
-export function compressImage(file, max = 1600, quality = 0.82) {
+// Képtömörítés feltöltés előtt: WebP, ha a böngésző tudja (kb. 30%-kal kisebb), különben JPEG.
+// Ha az eredeti fájl már kisebb, azt hagyjuk meg.
+let _webp = null;
+function canWebp() {
+  if (_webp === null) { try { const c = document.createElement('canvas'); c.width = c.height = 1; _webp = c.toDataURL('image/webp').startsWith('data:image/webp'); } catch (e) { _webp = false; } }
+  return _webp;
+}
+export function compressImage(file, max = 1280, quality = 0.74) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     const url = URL.createObjectURL(file);
@@ -73,9 +80,16 @@ export function compressImage(file, max = 1600, quality = 0.82) {
       const scale = Math.min(1, max / Math.max(img.width, img.height));
       const c = document.createElement('canvas');
       c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
-      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      const g = c.getContext('2d');
+      g.imageSmoothingQuality = 'high';
+      g.drawImage(img, 0, 0, c.width, c.height);
       URL.revokeObjectURL(url);
-      c.toBlob(b => b ? resolve(b) : reject(new Error('compress')), 'image/jpeg', quality);
+      const type = canWebp() ? 'image/webp' : 'image/jpeg';
+      c.toBlob(b => {
+        if (!b) return reject(new Error('compress'));
+        if (scale === 1 && /image\/(jpeg|webp)/.test(file.type) && file.size < b.size) return resolve(file);
+        resolve(b);
+      }, type, type === 'image/webp' ? quality - 0.04 : quality);
     };
     img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('image')); };
     img.src = url;
@@ -89,10 +103,12 @@ export function errText(e) {
   return t('error');
 }
 // Kis előnézeti kép listákhoz (~400 px)
-export function makeThumb(file) { return compressImage(file, 400, 0.72); }
-export function randomName() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8) + '.jpg';
+export function makeThumb(file) { return compressImage(file, 360, 0.62); }
+export function randomName(blob) {
+  const ext = blob?.type === 'image/webp' ? '.webp' : '.jpg';
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8) + ext;
 }
+export const imgType = blob => (blob?.type === 'image/webp' ? 'image/webp' : 'image/jpeg');
 
 export function spinner() { return `<div class="loader" role="status" aria-label="${esc(t('loading'))}"><svg class="bob-svg" viewBox="0 0 120 120" aria-hidden="true">       <g class="bob"><line x1="60" y1="8" x2="60" y2="30" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>       <path d="M43 54 A17 25 0 0 1 77 54 Z" fill="#E2A73E"/><path d="M43 54 A17 25 0 0 0 77 54 Z" fill="currentColor"/></g>       <ellipse class="ring r1" cx="60" cy="88" rx="30" ry="8"/><ellipse class="ring r2" cx="60" cy="88" rx="30" ry="8"/><ellipse class="ring r3" cx="60" cy="88" rx="30" ry="8"/>     </svg></div>`; }
 

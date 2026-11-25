@@ -1,6 +1,6 @@
 import { sb } from '../config.js';
 import { t, SPECIES, speciesName } from '../i18n.js';
-import { $, $$, esc, icon, fmtDate, openModal, closeModal, toast, catchPhotoUrls, compressImage, makeThumb, randomName } from '../ui.js';
+import { $, $$, esc, icon, fmtDate, openModal, closeModal, toast, catchPhotoUrls, compressImage, makeThumb, randomName, imgType } from '../ui.js';
 import { queueCatch, pendingCatches, flushQueue, isNetErr } from '../offline.js';
 import { shareCatchCard } from '../catchcard.js';
 import { weatherAt, wxInfo, wxIcon, trendArrow, moonName } from '../weather.js';
@@ -180,11 +180,10 @@ async function openCatchForm(ctx, c, done) {
     try {
       let oldPaths = [];
       if (blob) {
-        const name = randomName();
-        const path = `${ctx.user.id}/${name}`, tpath = `${ctx.user.id}/t_${name}`;
-        const up = await sb.storage.from('catch-photos').upload(path, blob, { contentType: 'image/jpeg' });
+        const path = `${ctx.user.id}/${randomName(blob)}`, tpath = `${ctx.user.id}/t_${randomName(thumb)}`;
+        const up = await sb.storage.from('catch-photos').upload(path, blob, { contentType: imgType(blob) });
         if (up.error) throw up.error;
-        const ut = await sb.storage.from('catch-photos').upload(tpath, thumb, { contentType: 'image/jpeg' });
+        const ut = await sb.storage.from('catch-photos').upload(tpath, thumb, { contentType: imgType(thumb) });
         oldPaths = [c?.photo_path, c?.thumb_path].filter(Boolean);
         row.photo_path = path; row.thumb_path = ut.error ? null : tpath;
       }

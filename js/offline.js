@@ -1,7 +1,7 @@
 // Offline fogásmentés: ha nincs net, a fogás (fotóval együtt) a telefonon marad (IndexedDB),
 // és amint újra van internet, automatikusan feltöltődik.
 import { sb } from './config.js';
-import { randomName } from './ui.js';
+import { randomName, imgType } from './ui.js';
 import { weatherAt } from './weather.js';
 
 const DB = 'ripple', STORE = 'catchQueue';
@@ -52,14 +52,13 @@ export async function flushQueue(ctx, onDone) {
       try {
         const row = { ...it.row, user_id: ctx.user.id };
         if (it.photo) {
-          const name = randomName();
-          const path = `${ctx.user.id}/${name}`;
-          const up = await sb.storage.from('catch-photos').upload(path, it.photo, { contentType: 'image/jpeg' });
+          const path = `${ctx.user.id}/${randomName(it.photo)}`;
+          const up = await sb.storage.from('catch-photos').upload(path, it.photo, { contentType: imgType(it.photo) });
           if (up.error) throw up.error;
           row.photo_path = path;
           if (it.thumb) {
-            const tp = `${ctx.user.id}/t_${name}`;
-            const ut = await sb.storage.from('catch-photos').upload(tp, it.thumb, { contentType: 'image/jpeg' });
+            const tp = `${ctx.user.id}/t_${randomName(it.thumb)}`;
+            const ut = await sb.storage.from('catch-photos').upload(tp, it.thumb, { contentType: imgType(it.thumb) });
             if (!ut.error) row.thumb_path = tp;
           }
         }
